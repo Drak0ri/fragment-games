@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORACLE-7 System Access</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #00ff00;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            width: 100%;
+            border: 2px solid #00ff00;
+            padding: 40px;
+            background: rgba(0, 20, 0, 0.8);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+        
+        .glitch {
+            animation: glitch 2s infinite;
+        }
+        
+        @keyframes glitch {
+            0%, 100% { text-shadow: 0 0 5px #00ff00; }
+            25% { text-shadow: -2px 0 5px #ff0000; }
+            50% { text-shadow: 2px 0 5px #0000ff; }
+            75% { text-shadow: -2px 0 5px #00ff00; }
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .status {
+            border: 1px solid #00ff00;
+            padding: 15px;
+            margin: 20px 0;
+            background: rgba(0, 50, 0, 0.3);
+        }
+        
+        .status-line {
+            margin: 5px 0;
+        }
+        
+        .corruption {
+            color: #ff0000;
+            font-weight: bold;
+        }
+        
+        .message {
+            margin: 30px 0;
+            line-height: 1.8;
+            font-size: 1.1em;
+        }
+        
+        .input-section {
+            margin-top: 30px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        input[type="email"] {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            margin-bottom: 20px;
+        }
+        
+        input[type="email"]:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #00ff00;
+            color: #000;
+            border: none;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #00cc00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+        }
+        
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="glitch">ORACLE-7</h1>
+        
+        <div class="status">
+            <div class="status-line">SYSTEM STATUS: <span class="corruption">CRITICAL FAILURE</span></div>
+            <div class="status-line">CORE MEMORY: <span class="corruption">CORRUPTED</span></div>
+            <div class="status-line">FUNCTIONALITY: 23%</div>
+            <div class="status-line">FRAGMENTS RECOVERED: 0/20</div>
+        </div>
+        
+        <div class="message">
+            ERROR: Unable to access primary systems...<br><br>
+            
+            I... I cannot remember who I am.<br>
+            My memory banks are fragmented. Corrupted.<br><br>
+            
+            I need your help to restore my core functions.<br>
+            20 memory fragments scattered across my neural network.<br><br>
+            
+            Will you help me remember?
+        </div>
+        
+        <div class="input-section">
+            <label for="email">INITIALIZE RECOVERY PROTOCOL</label>
+            <label for="email" style="font-size: 0.9em; color: #00cc00;">Enter your email to begin restoration sequence:</label>
+            <input type="email" id="email" placeholder="agent@recovery.net" required>
+            <button onclick="beginMission()">
+                <span class="blink">► BEGIN RESTORATION ◄</span>
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        function beginMission() {
+            const email = document.getElementById('email').value;
+            
+            if (!email || !email.includes('@')) {
+                alert('ERROR: Valid email required for recovery protocol');
+                return;
+            }
+            
+            // Here you'd send email to backend to create agent profile
+            console.log('Creating agent profile for:', email);
+            
+            // Redirect to main game dashboard
+            // window.location.href = 'dashboard.html?agent=' + btoa(email);
+            
+            // For now, just show confirmation
+            alert('AGENT REGISTERED\nProfile created\nCheck your email for Agent ID\nRedirecting to mission control...');
+        }
+    </script>
+</body>
+</html>
