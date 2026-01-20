@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💻 Debug Code</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #FFB6B9 0%, #FEC8D8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #FF6B9D;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        .instructions {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #FFE5EC;
+            border-radius: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #FF6B9D;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .code-block {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .code-line {
+            display: block;
+            padding: 2px 0;
+        }
+
+        .code-line.error {
+            background: rgba(255, 0, 0, 0.2);
+            border-left: 3px solid #ff0000;
+            padding-left: 10px;
+        }
+
+        .line-number {
+            display: inline-block;
+            width: 40px;
+            color: #858585;
+            user-select: none;
+        }
+
+        .keyword {
+            color: #569cd6;
+        }
+
+        .string {
+            color: #ce9178;
+        }
+
+        .function {
+            color: #dcdcaa;
+        }
+
+        .comment {
+            color: #6a9955;
+        }
+
+        .error-msg {
+            background: #ff4444;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option {
+            padding: 20px;
+            background: white;
+            border: 3px solid #FF6B9D;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.1em;
+        }
+
+        .option:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(255, 107, 157, 0.3);
+            background: #FFE5EC;
+        }
+
+        .option.correct {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+        .option.incorrect {
+            background: #F44336;
+            color: white;
+            border-color: #F44336;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.3em;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #FFB6B9 0%, #FEC8D8 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(255, 107, 157, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(255, 107, 157, 0.4);
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: #FFE5EC;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+
+        .reward {
+            font-size: 3em;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💻 Debug Code</h1>
+        <div class="instructions">Find and fix the bugs!</div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="score">0</div>
+                <div class="stat-label">Score</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="progress">0/5</div>
+                <div class="stat-label">Progress</div>
+            </div>
+        </div>
+
+        <div id="gameArea">
+            <div class="error-msg" id="errorMsg"></div>
+            <div class="code-block" id="codeBlock"></div>
+            <div class="options" id="options"></div>
+        </div>
+
+        <button class="btn" id="startBtn" onclick="startGame()">START DEBUGGING</button>
+
+        <div class="results" id="results">
+            <h2 style="color: #FF6B9D;">Debugging Complete!</h2>
+            <div class="reward" id="rewardDisplay"></div>
+            <div id="statsDisplay"></div>
+            <button class="btn" onclick="location.href='../games/oracle-7/dashboard.html'">Back to Game</button>
+            <button class="btn" onclick="resetGame()" style="margin-top: 10px;">Debug Again</button>
+        </div>
+    </div>
+
+    <script src="../shared/js/auth.js"></script>
+    <script>
+        const bugs = [
+            {
+                error: "SyntaxError: Missing closing parenthesis",
+                code: `<span class="keyword">function</span> <span class="function">greet</span>(name) {
+    <span class="keyword">console</span>.log(<span class="string">"Hello"</span> + name;
+}`,
+                errorLine: 2,
+                options: [
+                    'Add closing ) after name',
+                    'Remove the semicolon',
+                    'Change console.log to print',
+                    'Add quotes around name'
+                ],
+                answer: 0
+            },
+            {
+                error: "ReferenceError: Variable not defined",
+                code: `<span class="keyword">let</span> x = 10;
+<span class="keyword">let</span> y = 20;
+<span class="keyword">console</span>.log(z);`,
+                errorLine: 3,
+                options: [
+                    'Change z to x or y',
+                    'Remove the console.log',
+                    'Add let z = 30;',
+                    'Both option 1 and 3 work'
+                ],
+                answer: 3
+            },
+            {
+                error: "TypeError: Cannot read property of undefined",
+                code: `<span class="keyword">let</span> user;
+<span class="keyword">console</span>.log(user.name);`,
+                errorLine: 2,
+                options: [
+                    'Initialize user as an object: user = {name: "Bob"}',
+                    'Remove the .name',
+                    'Change user to User',
+                    'Add quotes around user'
+                ],
+                answer: 0
+            },
+            {
+                error: "SyntaxError: Invalid array syntax",
+                code: `<span class="keyword">let</span> colors = [<span class="string">"red"</span>, <span class="string">"blue"</span> <span class="string">"green"</span>];`,
+                errorLine: 1,
+                options: [
+                    'Add comma between "blue" and "green"',
+                    'Remove "green"',
+                    'Change brackets to parentheses',
+                    'Remove quotes from colors'
+                ],
+                answer: 0
+            },
+            {
+                error: "LogicError: Infinite loop detected",
+                code: `<span class="keyword">let</span> i = 0;
+<span class="keyword">while</span> (i < 10) {
+    <span class="keyword">console</span>.log(i);
+}`,
+                errorLine: 3,
+                options: [
+                    'Add i++ inside the loop',
+                    'Change while to for',
+                    'Remove the loop',
+                    'Change < to >'
+                ],
+                answer: 0
+            }
+        ];
+
+        let currentBug = 0;
+        let score = 0;
+        let answered = false;
+
+        function startGame() {
+            currentBug = 0;
+            score = 0;
+            answered = false;
+
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('gameArea').style.display = 'block';
+
+            showBug();
+        }
+
+        function showBug() {
+            if (currentBug >= bugs.length) {
+                endGame();
+                return;
+            }
+
+            answered = false;
+            const bug = bugs[currentBug];
+
+            document.getElementById('progress').textContent = `${currentBug}/${bugs.length}`;
+            document.getElementById('errorMsg').textContent = `❌ ${bug.error}`;
+
+            // Display code with line numbers
+            const lines = bug.code.split('\n');
+            const codeHTML = lines.map((line, index) => {
+                const lineNum = index + 1;
+                const isError = lineNum === bug.errorLine;
+                return `<span class="code-line ${isError ? 'error' : ''}"><span class="line-number">${lineNum}</span> ${line}</span>`;
+            }).join('\n');
+
+            document.getElementById('codeBlock').innerHTML = codeHTML;
+
+            // Display options
+            const optionsHTML = bug.options.map((option, index) =>
+                `<div class="option" onclick="selectAnswer(${index})">${option}</div>`
+            ).join('');
+
+            document.getElementById('options').innerHTML = optionsHTML;
+        }
+
+        function selectAnswer(selected) {
+            if (answered) return;
+
+            answered = true;
+            const bug = bugs[currentBug];
+            const options = document.querySelectorAll('.option');
+
+            options.forEach((option, index) => {
+                if (index === bug.answer) {
+                    option.classList.add('correct');
+                } else if (index === selected) {
+                    option.classList.add('incorrect');
+                }
+                option.style.pointerEvents = 'none';
+            });
+
+            if (selected === bug.answer) {
+                score++;
+                document.getElementById('score').textContent = score;
+            }
+
+            setTimeout(() => {
+                currentBug++;
+                showBug();
+            }, 1500);
+        }
+
+        function endGame() {
+            document.getElementById('gameArea').style.display = 'none';
+
+            const percentage = (score / bugs.length) * 100;
+
+            // Calculate reward
+            let currency = 0;
+            let message = '';
+
+            if (percentage === 100) {
+                currency = 30;
+                message = '🔥 PERFECT! Bug Hunter!';
+            } else if (percentage >= 80) {
+                currency = 25;
+                message = '⭐ Excellent! Great Debugging!';
+            } else if (percentage >= 60) {
+                currency = 20;
+                message = '👍 Good Job! Most Fixed!';
+            } else if (percentage >= 40) {
+                currency = 15;
+                message = '💪 Not Bad! Keep Learning!';
+            } else {
+                currency = 10;
+                message = '🐛 Keep Debugging!';
+            }
+
+            // Save reward
+            saveReward(currency);
+
+            // Show results
+            document.getElementById('rewardDisplay').textContent = `+${currency} ⚡`;
+            document.getElementById('statsDisplay').innerHTML = `
+                <p style="font-size: 1.5em; margin: 10px 0;">${message}</p>
+                <p style="font-size: 1.2em; margin: 10px 0;">Bugs Fixed: ${score}/${bugs.length} (${percentage}%)</p>
+            `;
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function saveReward(currency) {
+            const agent = getAgent();
+            if (!agent) return;
+
+            const gameState = JSON.parse(localStorage.getItem(`oracle7_${agent.id}`) || '{}');
+            gameState.currency = (gameState.currency || 0) + currency;
+            gameState.hints = (gameState.hints || 0) + Math.floor(currency / 20);
+            gameState.miniGamesPlayed = (gameState.miniGamesPlayed || 0) + 1;
+
+            localStorage.setItem(`oracle7_${agent.id}`, JSON.stringify(gameState));
+        }
+
+        function resetGame() {
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('score').textContent = '0';
+            document.getElementById('progress').textContent = '0/5';
+        }
+    </script>
+</body>
+</html>

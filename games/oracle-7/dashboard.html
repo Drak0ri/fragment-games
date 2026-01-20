@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ORACLE-7 Mission Control</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #00ff00;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 2px solid #00ff00;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            text-shadow: 0 0 10px #00ff00;
+            margin-bottom: 10px;
+        }
+
+        .agent-info {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0, 50, 0, 0.3);
+            border: 1px solid #00ff00;
+            padding: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .info-item {
+            padding: 10px 20px;
+        }
+
+        .info-label {
+            font-size: 0.8em;
+            opacity: 0.7;
+        }
+
+        .info-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #00ff00;
+        }
+
+        .corruption-bar {
+            width: 100%;
+            height: 30px;
+            background: #1a1a1a;
+            border: 2px solid #00ff00;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .corruption-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #00ff00);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .memory-slot {
+            aspect-ratio: 1;
+            border: 2px solid #00ff00;
+            background: rgba(0, 20, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .memory-slot:hover {
+            background: rgba(0, 50, 0, 0.8);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+            transform: scale(1.05);
+        }
+
+        .memory-slot.locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .memory-slot.unlocked {
+            background: rgba(0, 100, 0, 0.5);
+            border-color: #00ff00;
+            animation: pulse 2s infinite;
+        }
+
+        .memory-slot.completed {
+            background: rgba(0, 255, 0, 0.2);
+            border-color: #00ff00;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 0, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(0, 255, 0, 0.8); }
+        }
+
+        .slot-number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .slot-status {
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+
+        .slot-icon {
+            font-size: 1.5em;
+            margin-top: 5px;
+        }
+
+        .sidebar {
+            border: 2px solid #00ff00;
+            background: rgba(0, 20, 0, 0.8);
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 1px solid #00ff00;
+            padding-bottom: 10px;
+        }
+
+        .inventory-section {
+            margin-bottom: 30px;
+        }
+
+        .inventory-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            margin: 10px 0;
+            background: rgba(0, 50, 0, 0.3);
+            border: 1px solid #00ff00;
+        }
+
+        .item-count {
+            font-weight: bold;
+            color: #00ff00;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px;
+            background: #00ff00;
+            color: #000;
+            border: none;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #00cc00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .scan-zone {
+            border: 2px dashed #00ff00;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            background: rgba(0, 50, 0, 0.2);
+        }
+
+        .scan-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+            animation: blink 1.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .leaderboard {
+            margin-top: 20px;
+        }
+
+        .leaderboard-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            margin: 5px 0;
+            background: rgba(0, 30, 0, 0.5);
+            border-left: 3px solid #00ff00;
+        }
+
+        .leaderboard-entry.you {
+            background: rgba(0, 100, 0, 0.3);
+            border-left: 3px solid #ffff00;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #0a0a0a;
+            border: 2px solid #00ff00;
+            padding: 40px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 0 50px rgba(0, 255, 0, 0.5);
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .puzzle-content {
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        .close-btn {
+            float: right;
+            cursor: pointer;
+            font-size: 1.5em;
+            color: #ff0000;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+
+            .slots-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .slots-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 ORACLE-7 MISSION CONTROL</h1>
+        <p>MEMORY RESTORATION IN PROGRESS...</p>
+    </div>
+
+    <div class="agent-info">
+        <div class="info-item">
+            <div class="info-label">AGENT ID</div>
+            <div class="info-value" id="agentId">AGENT-???</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">FRAGMENTS FOUND</div>
+            <div class="info-value" id="fragmentsFound">0/20</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">CURRENCY</div>
+            <div class="info-value" id="currency">0 ⚡</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">RANK</div>
+            <div class="info-value" id="rank">#???</div>
+        </div>
+    </div>
+
+    <div class="corruption-bar">
+        <div class="corruption-fill" id="corruptionBar">0% RESTORED</div>
+    </div>
+
+    <div class="main-container">
+        <div class="slots-container">
+            <h2 style="margin-bottom: 20px; text-align: center;">MEMORY FRAGMENTS</h2>
+            <div class="slots-grid" id="slotsGrid">
+                <!-- Slots generated by JavaScript -->
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <h2>📦 INVENTORY</h2>
+
+            <div class="inventory-section">
+                <div class="inventory-item">
+                    <span>💡 Hints</span>
+                    <span class="item-count" id="hintsCount">0</span>
+                </div>
+                <div class="inventory-item">
+                    <span>⏭️ Skip Tokens</span>
+                    <span class="item-count" id="skipsCount">0/5</span>
+                </div>
+                <div class="inventory-item">
+                    <span>🔓 RFID Scans Today</span>
+                    <span class="item-count" id="rfidScans">0/3</span>
+                </div>
+            </div>
+
+            <div class="scan-zone" id="scanZone">
+                <div class="scan-icon">📡</div>
+                <div>RFID SCAN READY</div>
+                <div style="font-size: 0.8em; opacity: 0.7; margin-top: 10px;">
+                    Place tag near scanner
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn" onclick="window.location.href='/mini-games/typing.html'">⚡ MINI-GAMES</button>
+                <button class="btn btn-secondary" onclick="showLeaderboard()">🏆 LEADERBOARD</button>
+                <button class="btn btn-secondary" onclick="showHelp()">❓ HELP</button>
+                <button class="btn btn-secondary" onclick="logout()">🚪 EXIT</button>
+            </div>
+
+            <div class="leaderboard" id="leaderboardPreview" style="display: none;">
+                <h3 style="margin-top: 20px; margin-bottom: 10px;">TOP AGENTS</h3>
+                <div id="leaderboardList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Puzzle Modal -->
+    <div class="modal" id="puzzleModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">FRAGMENT #1</h2>
+            <div class="puzzle-content" id="puzzleContent">
+                <!-- Puzzle content loaded here -->
+            </div>
+            <div style="margin-top: 20px;">
+                <input type="text" id="puzzleAnswer" placeholder="Enter answer..." style="width: 100%; padding: 10px; background: #000; border: 2px solid #00ff00; color: #00ff00; font-family: 'Courier New', monospace; margin-bottom: 10px;">
+                <button class="btn" onclick="submitAnswer()" style="width: 100%;">SUBMIT ANSWER</button>
+                <button class="btn btn-secondary" onclick="useHint()" style="width: 100%; margin-top: 10px;">USE HINT (💡)</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../../shared/js/auth.js"></script>
+    <script src="../../shared/js/scanner.js"></script>
+    <script>
+        // Game state
+        let gameState = {
+            agentId: '',
+            email: '',
+            fragments: Array(20).fill(false),
+            hints: 0,
+            skips: 0,
+            currency: 0,
+            rfidScansToday: 0,
+            currentSlot: null
+        };
+
+        // Puzzle definitions (template - customize for each game)
+        const puzzles = [
+            {
+                id: 1,
+                title: "INITIALIZATION SEQUENCE",
+                question: "What is 2 + 2?",
+                answer: "4",
+                hint: "Basic arithmetic problem",
+                type: "math"
+            },
+            {
+                id: 2,
+                title: "PATTERN RECOGNITION",
+                question: "Complete the sequence: 2, 4, 6, 8, ?",
+                answer: "10",
+                hint: "Even numbers pattern",
+                type: "pattern"
+            },
+            {
+                id: 3,
+                title: "LOGIC GATE",
+                question: "If all Bloops are Razzies and all Razzies are Lazzies, are all Bloops Lazzies?",
+                answer: "yes",
+                hint: "Think about logical deduction",
+                type: "logic"
+            },
+            {
+                id: 4,
+                title: "CODE CIPHER",
+                question: "Decode: SVOOL DLIOW (shift 3 left)",
+                answer: "HELLO WORLD",
+                hint: "Caesar cipher - shift each letter",
+                type: "cipher"
+            },
+            {
+                id: 5,
+                title: "MEMORY RECALL",
+                question: "What is the name of this AI system?",
+                answer: "ORACLE-7",
+                hint: "Check the page title",
+                type: "trivia"
+            },
+            // Add 15 more puzzles here - placeholders for now
+            ...Array(15).fill(null).map((_, i) => ({
+                id: i + 6,
+                title: `FRAGMENT ${i + 6}`,
+                question: `Placeholder puzzle ${i + 6} - Replace with actual content`,
+                answer: `answer${i + 6}`,
+                hint: `Hint for puzzle ${i + 6}`,
+                type: "placeholder"
+            }))
+        ];
+
+        // Initialize dashboard
+        function init() {
+            loadGameState();
+            renderSlots();
+            updateUI();
+            initScanner();
+        }
+
+        // Load game state from localStorage
+        function loadGameState() {
+            const agent = getAgent();
+            if (!agent) {
+                window.location.href = 'landing.html';
+                return;
+            }
+
+            gameState.agentId = agent.id;
+            gameState.email = agent.email;
+
+            const saved = localStorage.getItem(`oracle7_${agent.id}`);
+            if (saved) {
+                gameState = { ...gameState, ...JSON.parse(saved) };
+            }
+        }
+
+        // Save game state
+        function saveGameState() {
+            localStorage.setItem(`oracle7_${gameState.agentId}`, JSON.stringify(gameState));
+        }
+
+        // Render memory slots
+        function renderSlots() {
+            const grid = document.getElementById('slotsGrid');
+            grid.innerHTML = '';
+
+            for (let i = 0; i < 20; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'memory-slot';
+
+                const isCompleted = gameState.fragments[i];
+                const isUnlocked = i === 0 || gameState.fragments[i - 1];
+
+                if (isCompleted) {
+                    slot.classList.add('completed');
+                } else if (isUnlocked) {
+                    slot.classList.add('unlocked');
+                } else {
+                    slot.classList.add('locked');
+                }
+
+                slot.innerHTML = `
+                    <div class="slot-number">${String(i + 1).padStart(2, '0')}</div>
+                    <div class="slot-status">${isCompleted ? 'RESTORED' : isUnlocked ? 'READY' : 'LOCKED'}</div>
+                    <div class="slot-icon">${isCompleted ? '✓' : isUnlocked ? '🔓' : '🔒'}</div>
+                `;
+
+                if (isUnlocked && !isCompleted) {
+                    slot.onclick = () => openPuzzle(i);
+                }
+
+                grid.appendChild(slot);
+            }
+        }
+
+        // Open puzzle modal
+        function openPuzzle(slotIndex) {
+            gameState.currentSlot = slotIndex;
+            const puzzle = puzzles[slotIndex];
+
+            document.getElementById('modalTitle').textContent = `FRAGMENT #${puzzle.id}: ${puzzle.title}`;
+            document.getElementById('puzzleContent').innerHTML = `
+                <p style="font-size: 1.2em; margin-bottom: 20px;">${puzzle.question}</p>
+                <p style="font-size: 0.9em; opacity: 0.7;">Type: ${puzzle.type.toUpperCase()}</p>
+            `;
+            document.getElementById('puzzleAnswer').value = '';
+            document.getElementById('puzzleModal').style.display = 'flex';
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('puzzleModal').style.display = 'none';
+            gameState.currentSlot = null;
+        }
+
+        // Submit answer
+        function submitAnswer() {
+            const userAnswer = document.getElementById('puzzleAnswer').value.trim().toLowerCase();
+            const puzzle = puzzles[gameState.currentSlot];
+
+            if (userAnswer === puzzle.answer.toLowerCase()) {
+                // Correct answer
+                gameState.fragments[gameState.currentSlot] = true;
+                gameState.currency += 10;
+
+                alert('✓ CORRECT! FRAGMENT RESTORED!\n+10 Currency');
+
+                saveGameState();
+                renderSlots();
+                updateUI();
+                closeModal();
+
+                // Check if all fragments found
+                if (gameState.fragments.every(f => f)) {
+                    showVictory();
+                }
+            } else {
+                alert('✗ INCORRECT. TRY AGAIN.');
+            }
+        }
+
+        // Use hint
+        function useHint() {
+            if (gameState.hints > 0) {
+                gameState.hints--;
+                const puzzle = puzzles[gameState.currentSlot];
+                alert(`💡 HINT: ${puzzle.hint}`);
+                saveGameState();
+                updateUI();
+            } else {
+                alert('NO HINTS AVAILABLE\nEarn more by playing mini-games!');
+            }
+        }
+
+        // Update UI
+        function updateUI() {
+            const fragmentsFound = gameState.fragments.filter(f => f).length;
+            const corruptionPercent = Math.round((fragmentsFound / 20) * 100);
+
+            document.getElementById('agentId').textContent = gameState.agentId;
+            document.getElementById('fragmentsFound').textContent = `${fragmentsFound}/20`;
+            document.getElementById('currency').textContent = `${gameState.currency} ⚡`;
+            document.getElementById('hintsCount').textContent = gameState.hints;
+            document.getElementById('skipsCount').textContent = `${gameState.skips}/5`;
+            document.getElementById('rfidScans').textContent = `${gameState.rfidScansToday}/3`;
+
+            const corruptionBar = document.getElementById('corruptionBar');
+            corruptionBar.style.width = `${corruptionPercent}%`;
+            corruptionBar.textContent = `${corruptionPercent}% RESTORED`;
+        }
+
+        // Initialize RFID scanner
+        function initScanner() {
+            if (typeof initRFIDScanner === 'function') {
+                initRFIDScanner(handleRFIDScan);
+            }
+        }
+
+        // Handle RFID scan
+        function handleRFIDScan(tagId) {
+            if (gameState.rfidScansToday >= 3) {
+                alert('DAILY RFID LIMIT REACHED\nCome back tomorrow!');
+                return;
+            }
+
+            // Extract slot number from tag (assume tag format: "FRAG-01", "FRAG-02", etc.)
+            const slotMatch = tagId.match(/FRAG-(\d+)/);
+            if (slotMatch) {
+                const slotIndex = parseInt(slotMatch[1]) - 1;
+
+                if (slotIndex >= 0 && slotIndex < 20) {
+                    if (!gameState.fragments[slotIndex]) {
+                        gameState.fragments[slotIndex] = true;
+                        gameState.rfidScansToday++;
+                        gameState.currency += 5;
+
+                        alert(`✓ RFID UNLOCK SUCCESSFUL!\nFragment #${slotIndex + 1} restored\n+5 Currency`);
+
+                        saveGameState();
+                        renderSlots();
+                        updateUI();
+                    } else {
+                        alert('Fragment already restored!');
+                    }
+                }
+            } else {
+                alert('INVALID TAG FORMAT');
+            }
+        }
+
+        // Show victory
+        function showVictory() {
+            alert('🎉 MISSION COMPLETE! 🎉\n\nAll 20 fragments restored!\nORACLE-7 functionality: 100%\n\nThank you, Agent ' + gameState.agentId);
+        }
+
+        // Show leaderboard
+        function showLeaderboard() {
+            const preview = document.getElementById('leaderboardPreview');
+            preview.style.display = preview.style.display === 'none' ? 'block' : 'none';
+
+            if (preview.style.display === 'block') {
+                loadLeaderboard();
+            }
+        }
+
+        // Load leaderboard
+        function loadLeaderboard() {
+            // Get all agents
+            const agents = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('oracle7_')) {
+                    const data = JSON.parse(localStorage.getItem(key));
+                    const agentId = key.replace('oracle7_', '');
+                    const fragmentsFound = data.fragments.filter(f => f).length;
+                    agents.push({ agentId, fragmentsFound, currency: data.currency });
+                }
+            }
+
+            // Sort by fragments, then currency
+            agents.sort((a, b) => {
+                if (b.fragmentsFound !== a.fragmentsFound) {
+                    return b.fragmentsFound - a.fragmentsFound;
+                }
+                return b.currency - a.currency;
+            });
+
+            // Display top 5
+            const list = document.getElementById('leaderboardList');
+            list.innerHTML = agents.slice(0, 5).map((agent, index) => `
+                <div class="leaderboard-entry ${agent.agentId === gameState.agentId ? 'you' : ''}">
+                    <span>#${index + 1} ${agent.agentId}</span>
+                    <span>${agent.fragmentsFound}/20 🔥</span>
+                </div>
+            `).join('');
+
+            // Update rank
+            const yourRank = agents.findIndex(a => a.agentId === gameState.agentId) + 1;
+            document.getElementById('rank').textContent = `#${yourRank}`;
+        }
+
+        // Show help
+        function showHelp() {
+            alert(`ORACLE-7 MISSION GUIDE
+
+🎯 OBJECTIVE: Restore all 20 memory fragments
+
+HOW TO PLAY:
+• Solve puzzles to unlock fragments
+• Earn currency from mini-games
+• Use hints or skip tokens (max 5 skips)
+• Scan RFID chips for instant unlocks (3/day)
+
+💡 TIPS:
+• Complete fragments in order
+• Play mini-games to earn currency
+• Spend currency on hints in the shop
+• Check leaderboard for your rank
+
+Good luck, Agent!`);
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Exit mission control?')) {
+                window.location.href = '/index.html';
+            }
+        }
+
+        // Initialize on load
+        window.onload = init;
+    </script>
+</body>
+</html>

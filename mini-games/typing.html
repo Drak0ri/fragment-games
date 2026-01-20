@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⌨️ Typing Speed Test</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #FFD93D 0%, #FFA500 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #FFA500;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #FFF9E6;
+            border-radius: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #FFA500;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .text-display {
+            background: #f5f5f5;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            line-height: 1.8;
+            min-height: 150px;
+        }
+
+        .text-display span {
+            transition: all 0.1s;
+        }
+
+        .text-display .correct {
+            color: #4CAF50;
+        }
+
+        .text-display .incorrect {
+            color: #ff0000;
+            background: #ffe0e0;
+        }
+
+        .text-display .current {
+            background: #FFD93D;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .input-area {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.2em;
+            font-family: 'Fredoka', sans-serif;
+            border: 3px solid #FFD93D;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            outline: none;
+        }
+
+        .input-area:focus {
+            border-color: #FFA500;
+            box-shadow: 0 0 20px rgba(255, 165, 0, 0.3);
+        }
+
+        .input-area:disabled {
+            background: #e0e0e0;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.3em;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #FFD93D 0%, #FFA500 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(255, 165, 0, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(255, 165, 0, 0.4);
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: #FFF9E6;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+
+        .results h2 {
+            color: #FFA500;
+            margin-bottom: 20px;
+        }
+
+        .reward {
+            font-size: 3em;
+            margin: 20px 0;
+        }
+
+        .back-btn {
+            margin-top: 20px;
+            background: transparent;
+            color: #FFA500;
+            border: 3px solid #FFA500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⌨️ Typing Speed Test</h1>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="wpm">0</div>
+                <div class="stat-label">WPM</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="accuracy">100</div>
+                <div class="stat-label">Accuracy %</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="timer">60</div>
+                <div class="stat-label">Seconds</div>
+            </div>
+        </div>
+
+        <div class="text-display" id="textDisplay"></div>
+
+        <input type="text" class="input-area" id="inputArea" placeholder="Click START to begin..." disabled>
+
+        <button class="btn" id="startBtn" onclick="startTest()">START TEST</button>
+
+        <div class="results" id="results">
+            <h2>Test Complete!</h2>
+            <div class="reward" id="rewardDisplay"></div>
+            <div id="statsDisplay"></div>
+            <button class="btn back-btn" onclick="goBack()">Back to Game</button>
+            <button class="btn" onclick="resetTest()" style="margin-top: 10px;">Try Again</button>
+        </div>
+    </div>
+
+    <script src="../shared/js/auth.js"></script>
+    <script>
+        const texts = [
+            "The quick brown fox jumps over the lazy dog and runs through the forest with great speed and agility.",
+            "Programming is the art of telling a computer what to do through a series of instructions written in code.",
+            "Space exploration helps us understand our universe and inspires future generations to reach for the stars.",
+            "Learning new skills requires patience practice and determination to overcome challenges along the way.",
+            "Technology advances rapidly changing how we communicate work and interact with the world around us."
+        ];
+
+        let currentText = '';
+        let startTime = null;
+        let timerInterval = null;
+        let timeLeft = 60;
+        let correctChars = 0;
+        let totalChars = 0;
+        let isTestActive = false;
+
+        function startTest() {
+            // Select random text
+            currentText = texts[Math.floor(Math.random() * texts.length)];
+
+            // Reset state
+            correctChars = 0;
+            totalChars = 0;
+            timeLeft = 60;
+            isTestActive = true;
+
+            // Display text
+            displayText();
+
+            // Enable input
+            const inputArea = document.getElementById('inputArea');
+            inputArea.value = '';
+            inputArea.disabled = false;
+            inputArea.placeholder = 'Start typing...';
+            inputArea.focus();
+
+            // Hide results
+            document.getElementById('results').style.display = 'none';
+
+            // Start timer
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 100);
+
+            // Update button
+            document.getElementById('startBtn').style.display = 'none';
+        }
+
+        function displayText() {
+            const display = document.getElementById('textDisplay');
+            display.innerHTML = currentText.split('').map((char, index) =>
+                `<span id="char-${index}">${char}</span>`
+            ).join('');
+        }
+
+        function updateTimer() {
+            const elapsed = (Date.now() - startTime) / 1000;
+            timeLeft = Math.max(0, 60 - elapsed);
+
+            document.getElementById('timer').textContent = Math.ceil(timeLeft);
+
+            if (timeLeft <= 0) {
+                endTest();
+            }
+        }
+
+        // Handle typing
+        document.getElementById('inputArea').addEventListener('input', function(e) {
+            if (!isTestActive) return;
+
+            const input = e.target.value;
+            totalChars = input.length;
+
+            // Check each character
+            correctChars = 0;
+            for (let i = 0; i < currentText.length; i++) {
+                const charSpan = document.getElementById(`char-${i}`);
+
+                if (i < input.length) {
+                    if (input[i] === currentText[i]) {
+                        charSpan.className = 'correct';
+                        correctChars++;
+                    } else {
+                        charSpan.className = 'incorrect';
+                    }
+                } else if (i === input.length) {
+                    charSpan.className = 'current';
+                } else {
+                    charSpan.className = '';
+                }
+            }
+
+            // Update stats
+            updateStats();
+
+            // Check if complete
+            if (input === currentText) {
+                endTest();
+            }
+        });
+
+        function updateStats() {
+            // Calculate WPM
+            const minutes = (Date.now() - startTime) / 1000 / 60;
+            const words = totalChars / 5; // Standard: 5 chars = 1 word
+            const wpm = Math.round(words / minutes) || 0;
+
+            // Calculate accuracy
+            const accuracy = totalChars > 0 ? Math.round((correctChars / totalChars) * 100) : 100;
+
+            document.getElementById('wpm').textContent = wpm;
+            document.getElementById('accuracy').textContent = accuracy;
+        }
+
+        function endTest() {
+            isTestActive = false;
+            clearInterval(timerInterval);
+
+            const inputArea = document.getElementById('inputArea');
+            inputArea.disabled = true;
+
+            // Calculate final stats
+            const finalTime = 60 - timeLeft;
+            const minutes = finalTime / 60;
+            const words = correctChars / 5;
+            const finalWPM = Math.round(words / minutes);
+            const finalAccuracy = totalChars > 0 ? Math.round((correctChars / totalChars) * 100) : 0;
+
+            // Calculate reward
+            let currency = 0;
+            let message = '';
+
+            if (finalWPM >= 60) {
+                currency = 30;
+                message = '🔥 AMAZING! Speed Demon!';
+            } else if (finalWPM >= 40) {
+                currency = 20;
+                message = '⭐ Great Job! Fast Typer!';
+            } else if (finalWPM >= 25) {
+                currency = 15;
+                message = '👍 Good Work! Keep Practicing!';
+            } else {
+                currency = 10;
+                message = '💪 Nice Try! You\'ll improve!';
+            }
+
+            // Accuracy bonus
+            if (finalAccuracy >= 95) {
+                currency += 10;
+            }
+
+            // Save reward
+            saveReward(currency);
+
+            // Show results
+            document.getElementById('rewardDisplay').textContent = `+${currency} ⚡`;
+            document.getElementById('statsDisplay').innerHTML = `
+                <p style="font-size: 1.5em; margin: 10px 0;">${message}</p>
+                <p style="font-size: 1.2em; margin: 10px 0;">WPM: ${finalWPM} | Accuracy: ${finalAccuracy}%</p>
+                <p style="font-size: 1em; color: #888;">Time: ${Math.round(finalTime)}s</p>
+            `;
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function saveReward(currency) {
+            const agent = getAgent();
+            if (!agent) return;
+
+            // Update currency in current game
+            const gameState = JSON.parse(localStorage.getItem(`oracle7_${agent.id}`) || '{}');
+            gameState.currency = (gameState.currency || 0) + currency;
+            gameState.hints = (gameState.hints || 0) + Math.floor(currency / 20); // 1 hint per 20 currency
+            gameState.miniGamesPlayed = (gameState.miniGamesPlayed || 0) + 1;
+
+            localStorage.setItem(`oracle7_${agent.id}`, JSON.stringify(gameState));
+        }
+
+        function resetTest() {
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('inputArea').value = '';
+            document.getElementById('inputArea').placeholder = 'Click START to begin...';
+            document.getElementById('wpm').textContent = '0';
+            document.getElementById('accuracy').textContent = '100';
+            document.getElementById('timer').textContent = '60';
+            displayText();
+        }
+
+        function goBack() {
+            window.location.href = '../games/oracle-7/dashboard.html';
+        }
+
+        // Initialize
+        displayText();
+    </script>
+</body>
+</html>

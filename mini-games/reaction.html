@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Reaction Time</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #FF6B9D 0%, #C44569 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        h1 {
+            color: #FF6B9D;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .game-area {
+            width: 100%;
+            height: 400px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f5f5f5;
+            color: #888;
+        }
+
+        .game-area.waiting {
+            background: #FFA726;
+            color: white;
+        }
+
+        .game-area.ready {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .game-area.too-early {
+            background: #F44336;
+            color: white;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #FFE5EC;
+            border-radius: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #FF6B9D;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.3em;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #FF6B9D 0%, #C44569 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(255, 107, 157, 0.3);
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(255, 107, 157, 0.4);
+        }
+
+        .results {
+            display: none;
+            padding: 30px;
+            background: #FFE5EC;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+
+        .reward {
+            font-size: 3em;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚡ Reaction Time</h1>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="avgTime">0</div>
+                <div class="stat-label">Avg (ms)</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="bestTime">-</div>
+                <div class="stat-label">Best (ms)</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="attempts">0/5</div>
+                <div class="stat-label">Attempts</div>
+            </div>
+        </div>
+
+        <div class="game-area" id="gameArea" onclick="handleClick()">
+            Click START to begin
+        </div>
+
+        <button class="btn" id="startBtn" onclick="startTest()">START TEST</button>
+
+        <div class="results" id="results">
+            <h2 style="color: #FF6B9D;">Test Complete!</h2>
+            <div class="reward" id="rewardDisplay"></div>
+            <div id="statsDisplay"></div>
+            <button class="btn" onclick="location.href='../games/oracle-7/dashboard.html'">Back to Game</button>
+            <button class="btn" onclick="resetTest()">Try Again</button>
+        </div>
+    </div>
+
+    <script src="../shared/js/auth.js"></script>
+    <script>
+        let state = 'idle'; // idle, waiting, ready, done
+        let startTime = null;
+        let waitTimeout = null;
+        let times = [];
+        let currentAttempt = 0;
+        const maxAttempts = 5;
+
+        function startTest() {
+            times = [];
+            currentAttempt = 0;
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('avgTime').textContent = '0';
+            document.getElementById('bestTime').textContent = '-';
+            document.getElementById('attempts').textContent = '0/5';
+
+            nextAttempt();
+        }
+
+        function nextAttempt() {
+            if (currentAttempt >= maxAttempts) {
+                endTest();
+                return;
+            }
+
+            state = 'waiting';
+            const gameArea = document.getElementById('gameArea');
+            gameArea.className = 'game-area waiting';
+            gameArea.textContent = 'Wait for green...';
+
+            // Random delay between 1-4 seconds
+            const delay = 1000 + Math.random() * 3000;
+
+            waitTimeout = setTimeout(() => {
+                state = 'ready';
+                gameArea.className = 'game-area ready';
+                gameArea.textContent = 'CLICK NOW!';
+                startTime = Date.now();
+            }, delay);
+        }
+
+        function handleClick() {
+            const gameArea = document.getElementById('gameArea');
+
+            if (state === 'idle' || state === 'done') {
+                return;
+            }
+
+            if (state === 'waiting') {
+                // Too early!
+                clearTimeout(waitTimeout);
+                state = 'idle';
+                gameArea.className = 'game-area too-early';
+                gameArea.textContent = 'Too Early! Wait for green...';
+
+                setTimeout(() => {
+                    nextAttempt();
+                }, 1500);
+                return;
+            }
+
+            if (state === 'ready') {
+                // Good click!
+                const reactionTime = Date.now() - startTime;
+                times.push(reactionTime);
+                currentAttempt++;
+
+                // Update stats
+                updateStats();
+
+                // Show result
+                state = 'idle';
+                gameArea.className = 'game-area';
+                gameArea.textContent = `${reactionTime}ms - ${getFeedback(reactionTime)}`;
+
+                setTimeout(() => {
+                    nextAttempt();
+                }, 1000);
+            }
+        }
+
+        function updateStats() {
+            const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+            const best = Math.min(...times);
+
+            document.getElementById('avgTime').textContent = avg;
+            document.getElementById('bestTime').textContent = best;
+            document.getElementById('attempts').textContent = `${currentAttempt}/${maxAttempts}`;
+        }
+
+        function getFeedback(time) {
+            if (time < 200) return '🔥 LIGHTNING!';
+            if (time < 250) return '⚡ SUPER FAST!';
+            if (time < 300) return '⭐ GREAT!';
+            if (time < 400) return '👍 GOOD!';
+            return '💪 NOT BAD!';
+        }
+
+        function endTest() {
+            state = 'done';
+            const gameArea = document.getElementById('gameArea');
+            gameArea.className = 'game-area';
+            gameArea.textContent = 'Test Complete!';
+
+            const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
+            const best = Math.min(...times);
+
+            // Calculate reward
+            let currency = 0;
+            let message = '';
+
+            if (avg < 250) {
+                currency = 30;
+                message = '🔥 INCREDIBLE! Lightning Reflexes!';
+            } else if (avg < 300) {
+                currency = 20;
+                message = '⚡ Excellent! Super Fast!';
+            } else if (avg < 350) {
+                currency = 15;
+                message = '👍 Good! Nice Reflexes!';
+            } else {
+                currency = 10;
+                message = '💪 Not Bad! Keep Practicing!';
+            }
+
+            // Save reward
+            saveReward(currency);
+
+            // Show results
+            document.getElementById('rewardDisplay').textContent = `+${currency} ⚡`;
+            document.getElementById('statsDisplay').innerHTML = `
+                <p style="font-size: 1.5em; margin: 10px 0;">${message}</p>
+                <p style="font-size: 1.2em; margin: 10px 0;">Average: ${avg}ms | Best: ${best}ms</p>
+            `;
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function saveReward(currency) {
+            const agent = getAgent();
+            if (!agent) return;
+
+            const gameState = JSON.parse(localStorage.getItem(`oracle7_${agent.id}`) || '{}');
+            gameState.currency = (gameState.currency || 0) + currency;
+            gameState.hints = (gameState.hints || 0) + Math.floor(currency / 20);
+            gameState.miniGamesPlayed = (gameState.miniGamesPlayed || 0) + 1;
+
+            localStorage.setItem(`oracle7_${agent.id}`, JSON.stringify(gameState));
+        }
+
+        function resetTest() {
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            const gameArea = document.getElementById('gameArea');
+            gameArea.className = 'game-area';
+            gameArea.textContent = 'Click START to begin';
+            state = 'idle';
+        }
+    </script>
+</body>
+</html>
