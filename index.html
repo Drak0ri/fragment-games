@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fragment Games - Mission Selection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+            color: #00ff00;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            color: #00cc00;
+        }
+        
+        .games-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+        
+        .game-card {
+            background: rgba(0, 20, 0, 0.6);
+            border: 2px solid #00ff00;
+            padding: 30px;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 255, 0, 0.3);
+            border-color: #00ff00;
+        }
+        
+        .game-card.active {
+            border-color: #ffff00;
+            background: rgba(50, 50, 0, 0.3);
+        }
+        
+        .game-card.active::before {
+            content: "⚡ ACTIVE NOW";
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            background: #ffff00;
+            color: #000;
+            padding: 5px 15px;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+        
+        .game-card.coming-soon {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #666;
+        }
+        
+        .game-card.coming-soon::before {
+            content: "COMING SOON";
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            background: #666;
+            color: #fff;
+            padding: 5px 15px;
+            font-weight: bold;
+            font-size: 0.8em;
+        }
+        
+        .game-title {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            color: #00ff00;
+        }
+        
+        .game-status {
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            color: #00cc00;
+        }
+        
+        .game-description {
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #00dd00;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid #00ff00;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ffff00;
+        }
+        
+        .stat-label {
+            font-size: 0.8em;
+            color: #00cc00;
+        }
+        
+        .play-button {
+            width: 100%;
+            padding: 15px;
+            background: #00ff00;
+            color: #000;
+            border: none;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        .play-button:hover {
+            background: #00cc00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.7);
+        }
+        
+        .play-button:disabled {
+            background: #333;
+            color: #666;
+            cursor: not-allowed;
+        }
+        
+        .mini-games-section {
+            max-width: 1200px;
+            margin: 60px auto 0;
+            padding: 30px;
+            background: rgba(0, 20, 50, 0.6);
+            border: 2px solid #0099ff;
+        }
+        
+        .mini-games-section h2 {
+            color: #0099ff;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        
+        .mini-games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .mini-game-btn {
+            padding: 20px;
+            background: rgba(0, 50, 100, 0.5);
+            border: 2px solid #0099ff;
+            color: #0099ff;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .mini-game-btn:hover {
+            background: rgba(0, 100, 200, 0.5);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚡ FRAGMENT GAMES ⚡</h1>
+        <p>Choose Your Mission // Restore The Systems</p>
+    </div>
+    
+    <div class="games-container">
+        <!-- ACTIVE GAME -->
+        <div class="game-card active" onclick="launchGame('oracle-7')">
+            <h2 class="game-title">ORACLE-7: Memory Fragments</h2>
+            <div class="game-status">STATUS: ACTIVE // Ends Feb 3, 2026</div>
+            <p class="game-description">
+                An AI system has suffered catastrophic memory corruption. 
+                Scan 20 memory fragments to restore ORACLE-7's consciousness. 
+                Can you piece together what happened?
+            </p>
+            <div class="game-stats">
+                <div class="stat">
+                    <div class="stat-value">127</div>
+                    <div class="stat-label">Active Agents</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">8/20</div>
+                    <div class="stat-label">Avg Progress</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+            <button class="play-button">► LAUNCH MISSION</button>
+        </div>
+        
+        <!-- COMING SOON -->
+        <div class="game-card coming-soon">
+            <h2 class="game-title">VIRUS HUNT: Network Breach</h2>
+            <div class="game-status">STATUS: LOCKED // Available Feb 4, 2026</div>
+            <p class="game-description">
+                The school network has been infected. Track down malicious code, 
+                quarantine threats, and restore system integrity before data is lost.
+            </p>
+            <div class="game-stats">
+                <div class="stat">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">Active Agents</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">Avg Progress</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+            <button class="play-button" disabled>🔒 COMING SOON</button>
+        </div>
+        
+        <div class="game-card coming-soon">
+            <h2 class="game-title">TIME CAPSULE: Lost Archives</h2>
+            <div class="game-status">STATUS: LOCKED // Available Feb 18, 2026</div>
+            <p class="game-description">
+                Ancient artifacts have been discovered beneath the school. 
+                Decode historical clues and solve the mystery of what lies beneath.
+            </p>
+            <div class="game-stats">
+                <div class="stat">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">Active Agents</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">Avg Progress</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+            <button class="play-button" disabled>🔒 COMING SOON</button>
+        </div>
+        
+        <div class="game-card coming-soon">
+            <h2 class="game-title">ESCAPE POD: Station Failure</h2>
+            <div class="game-status">STATUS: LOCKED // Available Mar 4, 2026</div>
+            <p class="game-description">
+                The space station is failing. Diagnose critical systems, 
+                sequence the launch protocol, and escape before total collapse.
+            </p>
+            <div class="game-stats">
+                <div class="stat">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">Active Agents</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">Avg Progress</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">--</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+            <button class="play-button" disabled>🔒 COMING SOON</button>
+        </div>
+    </div>
+    
+    <div class="mini-games-section">
+        <h2>⚡ TRAINING PROTOCOLS (Mini-Games)</h2>
+        <p style="color: #0099ff; margin-bottom: 20px;">
+            Sharpen your skills and earn credits to use in any mission
+        </p>
+        <div class="mini-games-grid">
+            <button class="mini-game-btn" onclick="launchMiniGame('typing')">
+                ⌨️ Typing Speed Test
+            </button>
+            <button class="mini-game-btn" onclick="launchMiniGame('memory')">
+                🧠 Memory Match
+            </button>
+            <button class="mini-game-btn" onclick="launchMiniGame('reaction')">
+                ⚡ Reaction Time
+            </button>
+            <button class="mini-game-btn" onclick="launchMiniGame('trivia')">
+                🎯 Quick Trivia
+            </button>
+            <button class="mini-game-btn" onclick="launchMiniGame('pattern')">
+                🔍 Pattern Recognition
+            </button>
+            <button class="mini-game-btn" onclick="launchMiniGame('code')">
+                💻 Code Debug
+            </button>
+        </div>
+    </div>
+    
+    <script>
+        function launchGame(gameId) {
+            // Check if game is active
+            if (gameId === 'oracle-7') {
+                window.location.href = `games/${gameId}/landing.html`;
+            } else {
+                alert('This mission is not yet available. Check back soon!');
+            }
+        }
+        
+        function launchMiniGame(gameType) {
+            window.location.href = `mini-games/${gameType}.html`;
+        }
+        
+        // Update stats periodically (would connect to real backend)
+        function updateStats() {
+            // Fetch from backend API
+            console.log('Updating game statistics...');
+        }
+        
+        // Update every 30 seconds
+        setInterval(updateStats, 30000);
+    </script>
+</body>
+</html>
