@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Pattern Hunt</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #C4A9FF 0%, #9B59B6 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #9B59B6;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        .instructions {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #F3E5FF;
+            border-radius: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #9B59B6;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .target-pattern {
+            text-align: center;
+            padding: 30px;
+            background: #F3E5FF;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            font-size: 3em;
+            letter-spacing: 10px;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 10px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 20px;
+        }
+
+        .grid-item {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 3px solid transparent;
+        }
+
+        .grid-item:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .grid-item.found {
+            border-color: #4CAF50;
+            background: #C8E6C9;
+            animation: found 0.5s;
+        }
+
+        @keyframes found {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2) rotate(10deg); }
+        }
+
+        .btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.3em;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #C4A9FF 0%, #9B59B6 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(155, 89, 182, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(155, 89, 182, 0.4);
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: #F3E5FF;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+
+        .reward {
+            font-size: 3em;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Pattern Hunt</h1>
+        <div class="instructions">Find all matching patterns!</div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="found">0</div>
+                <div class="stat-label">Found</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="target">0</div>
+                <div class="stat-label">Target</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="timer">30</div>
+                <div class="stat-label">Seconds</div>
+            </div>
+        </div>
+
+        <div class="target-pattern" id="targetPattern">Click START</div>
+
+        <div class="grid-container" id="grid"></div>
+
+        <button class="btn" id="startBtn" onclick="startGame()">START GAME</button>
+
+        <div class="results" id="results">
+            <h2 style="color: #9B59B6;">Game Complete!</h2>
+            <div class="reward" id="rewardDisplay"></div>
+            <div id="statsDisplay"></div>
+            <button class="btn" onclick="location.href='../games/oracle-7/dashboard.html'">Back to Game</button>
+            <button class="btn" onclick="resetGame()" style="margin-top: 10px;">Play Again</button>
+        </div>
+    </div>
+
+    <script src="../shared/js/auth.js"></script>
+    <script>
+        const symbols = ['🔷', '🔶', '⭐', '💎', '🔥', '⚡', '🌟', '💫', '🎯', '🎪', '🎨', '🎭'];
+        let targetSymbol = '';
+        let targetCount = 0;
+        let foundCount = 0;
+        let timeLeft = 30;
+        let timerInterval = null;
+        let isPlaying = false;
+
+        function startGame() {
+            // Reset
+            foundCount = 0;
+            timeLeft = 30;
+            isPlaying = true;
+
+            // Select random target
+            targetSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+            targetCount = 5 + Math.floor(Math.random() * 6); // 5-10 targets
+
+            // Show target
+            document.getElementById('targetPattern').textContent = targetSymbol;
+            document.getElementById('found').textContent = '0';
+            document.getElementById('target').textContent = targetCount;
+
+            // Generate grid
+            generateGrid();
+
+            // Start timer
+            timerInterval = setInterval(updateTimer, 1000);
+
+            // Hide controls
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('results').style.display = 'none';
+        }
+
+        function generateGrid() {
+            const grid = document.getElementById('grid');
+            const gridSize = 64; // 8x8 grid
+            const items = [];
+
+            // Add target symbols
+            for (let i = 0; i < targetCount; i++) {
+                items.push({ symbol: targetSymbol, isTarget: true });
+            }
+
+            // Fill rest with random symbols
+            while (items.length < gridSize) {
+                const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+                if (symbol !== targetSymbol) {
+                    items.push({ symbol: symbol, isTarget: false });
+                }
+            }
+
+            // Shuffle
+            items.sort(() => Math.random() - 0.5);
+
+            // Render
+            grid.innerHTML = items.map((item, index) => `
+                <div class="grid-item" onclick="clickItem(${index}, ${item.isTarget})"
+                     style="background: linear-gradient(135deg, #${Math.random().toString(16).substr(2, 6)}, #${Math.random().toString(16).substr(2, 6)});">
+                    ${item.symbol}
+                </div>
+            `).join('');
+        }
+
+        function clickItem(index, isTarget) {
+            if (!isPlaying) return;
+
+            const item = document.querySelectorAll('.grid-item')[index];
+
+            if (isTarget && !item.classList.contains('found')) {
+                item.classList.add('found');
+                foundCount++;
+                document.getElementById('found').textContent = foundCount;
+
+                // Play success sound (optional)
+                playBeep(800);
+
+                // Check if complete
+                if (foundCount === targetCount) {
+                    setTimeout(endGame, 500);
+                }
+            } else if (!isTarget) {
+                // Wrong item - visual feedback
+                item.style.animation = 'shake 0.5s';
+                setTimeout(() => item.style.animation = '', 500);
+                playBeep(300);
+            }
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            document.getElementById('timer').textContent = timeLeft;
+
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            isPlaying = false;
+            clearInterval(timerInterval);
+
+            const percentage = (foundCount / targetCount) * 100;
+            const timeUsed = 30 - timeLeft;
+
+            // Calculate reward
+            let currency = 0;
+            let message = '';
+
+            if (percentage === 100 && timeUsed <= 20) {
+                currency = 30;
+                message = '🔥 PERFECT! Pattern Master!';
+            } else if (percentage === 100) {
+                currency = 25;
+                message = '⭐ Excellent! All Found!';
+            } else if (percentage >= 80) {
+                currency = 20;
+                message = '👍 Great! Almost Perfect!';
+            } else if (percentage >= 60) {
+                currency = 15;
+                message = '💪 Good Try!';
+            } else {
+                currency = 10;
+                message = '👀 Keep Looking!';
+            }
+
+            // Save reward
+            saveReward(currency);
+
+            // Show results
+            document.getElementById('rewardDisplay').textContent = `+${currency} ⚡`;
+            document.getElementById('statsDisplay').innerHTML = `
+                <p style="font-size: 1.5em; margin: 10px 0;">${message}</p>
+                <p style="font-size: 1.2em; margin: 10px 0;">Found: ${foundCount}/${targetCount} (${Math.round(percentage)}%)</p>
+                <p style="font-size: 1em; color: #888;">Time: ${timeUsed}s</p>
+            `;
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function saveReward(currency) {
+            const agent = getAgent();
+            if (!agent) return;
+
+            const gameState = JSON.parse(localStorage.getItem(`oracle7_${agent.id}`) || '{}');
+            gameState.currency = (gameState.currency || 0) + currency;
+            gameState.hints = (gameState.hints || 0) + Math.floor(currency / 20);
+            gameState.miniGamesPlayed = (gameState.miniGamesPlayed || 0) + 1;
+
+            localStorage.setItem(`oracle7_${agent.id}`, JSON.stringify(gameState));
+        }
+
+        function resetGame() {
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('targetPattern').textContent = 'Click START';
+            document.getElementById('grid').innerHTML = '';
+            document.getElementById('timer').textContent = '30';
+        }
+
+        function playBeep(freq) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.1);
+            } catch (e) {}
+        }
+    </script>
+</body>
+</html>

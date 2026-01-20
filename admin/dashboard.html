@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Fragment Games</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #FF6B9D 0%, #C44569 100%);
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 20px;
+            border: 2px solid #3a3a3a;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: #FF6B9D;
+            transform: translateY(-5px);
+        }
+
+        .stat-value {
+            font-size: 3em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FF6B9D 0%, #FFA07A 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        .section {
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #FF6B9D;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3a3a3a;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #3a3a3a;
+        }
+
+        th {
+            background: #3a3a3a;
+            color: #FF6B9D;
+            font-weight: 700;
+        }
+
+        tr:hover {
+            background: #333;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: #3a3a3a;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #FF6B9D 0%, #FFA07A 100%);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: 700;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #FF6B9D 0%, #C44569 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 107, 157, 0.4);
+        }
+
+        .btn-secondary {
+            background: #3a3a3a;
+        }
+
+        .fragment-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .fragment-box {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            border: 2px solid #3a3a3a;
+        }
+
+        .fragment-box.unlocked {
+            background: linear-gradient(135deg, #6BCF7F 0%, #4CAF50 100%);
+            color: white;
+        }
+
+        .fragment-box.locked {
+            background: #3a3a3a;
+            color: #666;
+        }
+
+        .tag-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .tag-item {
+            background: #3a3a3a;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid transparent;
+        }
+
+        .tag-item.active {
+            border-color: #4CAF50;
+        }
+
+        .chart {
+            margin: 20px 0;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎮 Admin Dashboard</h1>
+        <p>Fragment Games Control Center</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-value" id="totalAgents">0</div>
+            <div class="stat-label">Total Agents</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="activeToday">0</div>
+            <div class="stat-label">Active Today</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="avgProgress">0%</div>
+            <div class="stat-label">Avg Progress</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" id="completions">0</div>
+            <div class="stat-label">Completions</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>📊 Overall Progress</h2>
+        <div class="progress-bar">
+            <div class="progress-fill" id="overallProgress">0%</div>
+        </div>
+        <p style="color: #888; margin-top: 10px;">System restoration across all agents</p>
+    </div>
+
+    <div class="section">
+        <h2>🧩 Fragment Discovery Status</h2>
+        <p style="color: #888; margin-bottom: 15px;">Shows which fragments have been discovered by at least one agent</p>
+        <div class="fragment-grid" id="fragmentGrid"></div>
+    </div>
+
+    <div class="section">
+        <h2>🏆 Top Agents</h2>
+        <table id="leaderboardTable">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Agent ID</th>
+                    <th>Fragments</th>
+                    <th>Currency</th>
+                    <th>Mini-Games</th>
+                    <th>Last Active</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboardBody"></tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>📡 RFID Tags</h2>
+        <p style="color: #888; margin-bottom: 15px;">Track RFID tag usage and scans</p>
+        <div class="tag-list" id="tagList"></div>
+    </div>
+
+    <div class="section">
+        <h2>⚙️ Admin Actions</h2>
+        <div class="actions">
+            <button class="btn" onclick="exportData()">📥 Export All Data (CSV)</button>
+            <button class="btn" onclick="exportEmails()">📧 Export Email List</button>
+            <button class="btn btn-secondary" onclick="refreshData()">🔄 Refresh Data</button>
+            <button class="btn btn-secondary" onclick="resetDemo()">⚠️ Reset Demo Data</button>
+            <button class="btn" onclick="location.href='../index.html'">🏠 Back to Home</button>
+        </div>
+    </div>
+
+    <script src="../shared/js/auth.js"></script>
+    <script src="../shared/js/leaderboard.js"></script>
+    <script>
+        function loadDashboard() {
+            const gameId = 'oracle7';
+
+            // Get all agents
+            const agents = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith(`${gameId}_`)) {
+                    const agentId = key.replace(`${gameId}_`, '');
+                    const data = JSON.parse(localStorage.getItem(key));
+
+                    // Get agent info
+                    const agentInfo = getAgentById(agentId);
+
+                    agents.push({
+                        id: agentId,
+                        email: agentInfo?.email || 'Unknown',
+                        fragments: data.fragments || Array(20).fill(false),
+                        currency: data.currency || 0,
+                        miniGamesPlayed: data.miniGamesPlayed || 0,
+                        lastActive: data.lastActive || agentInfo?.lastActive || 'Unknown'
+                    });
+                }
+            }
+
+            // Calculate stats
+            const totalAgents = agents.length;
+            const today = new Date().toDateString();
+            const activeToday = agents.filter(a =>
+                new Date(a.lastActive).toDateString() === today
+            ).length;
+
+            let totalFragments = 0;
+            let completions = 0;
+
+            agents.forEach(agent => {
+                const found = agent.fragments.filter(f => f).length;
+                totalFragments += found;
+                if (found === 20) completions++;
+            });
+
+            const avgProgress = totalAgents > 0
+                ? Math.round((totalFragments / (totalAgents * 20)) * 100)
+                : 0;
+
+            // Update stats
+            document.getElementById('totalAgents').textContent = totalAgents;
+            document.getElementById('activeToday').textContent = activeToday;
+            document.getElementById('avgProgress').textContent = avgProgress + '%';
+            document.getElementById('completions').textContent = completions;
+
+            // Update overall progress
+            const progressBar = document.getElementById('overallProgress');
+            progressBar.style.width = avgProgress + '%';
+            progressBar.textContent = avgProgress + '%';
+
+            // Fragment discovery status
+            const fragmentDiscovery = Array(20).fill(0);
+            agents.forEach(agent => {
+                agent.fragments.forEach((found, index) => {
+                    if (found) fragmentDiscovery[index]++;
+                });
+            });
+
+            const fragmentGrid = document.getElementById('fragmentGrid');
+            fragmentGrid.innerHTML = fragmentDiscovery.map((count, index) => `
+                <div class="fragment-box ${count > 0 ? 'unlocked' : 'locked'}"
+                     title="Fragment ${index + 1}: ${count} discoveries">
+                    ${index + 1}
+                </div>
+            `).join('');
+
+            // Leaderboard
+            const sorted = [...agents].sort((a, b) => {
+                const aFound = a.fragments.filter(f => f).length;
+                const bFound = b.fragments.filter(f => f).length;
+                if (bFound !== aFound) return bFound - aFound;
+                return b.currency - a.currency;
+            });
+
+            const leaderboardBody = document.getElementById('leaderboardBody');
+            leaderboardBody.innerHTML = sorted.slice(0, 20).map((agent, index) => {
+                const found = agent.fragments.filter(f => f).length;
+                const lastActive = agent.lastActive !== 'Unknown'
+                    ? new Date(agent.lastActive).toLocaleString()
+                    : 'Unknown';
+
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${agent.id}</td>
+                        <td>${found}/20</td>
+                        <td>${agent.currency} ⚡</td>
+                        <td>${agent.miniGamesPlayed}</td>
+                        <td>${lastActive}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            // RFID Tags (simulated)
+            const tagList = document.getElementById('tagList');
+            tagList.innerHTML = Array(20).fill(null).map((_, i) => `
+                <div class="tag-item ${fragmentDiscovery[i] > 0 ? 'active' : ''}">
+                    <div style="font-size: 1.5em; margin-bottom: 5px;">📡</div>
+                    <div style="font-weight: 700;">FRAG-${String(i + 1).padStart(2, '0')}</div>
+                    <div style="font-size: 0.8em; color: #888;">${fragmentDiscovery[i]} scans</div>
+                </div>
+            `).join('');
+        }
+
+        function exportData() {
+            const gameId = 'oracle7';
+            const agents = [];
+
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith(`${gameId}_`)) {
+                    const agentId = key.replace(`${gameId}_`, '');
+                    const data = JSON.parse(localStorage.getItem(key));
+                    const agentInfo = getAgentById(agentId);
+
+                    const found = data.fragments ? data.fragments.filter(f => f).length : 0;
+
+                    agents.push({
+                        agentId,
+                        email: agentInfo?.email || 'Unknown',
+                        fragments: found,
+                        currency: data.currency || 0,
+                        miniGames: data.miniGamesPlayed || 0
+                    });
+                }
+            }
+
+            const csv = [
+                'Agent ID,Email,Fragments,Currency,Mini-Games',
+                ...agents.map(a => `${a.agentId},${a.email},${a.fragments},${a.currency},${a.miniGames}`)
+            ].join('\n');
+
+            downloadCSV(csv, 'fragment-games-data.csv');
+        }
+
+        function exportEmails() {
+            const agents = getAllAgents();
+            const emails = agents.map(a => a.email).join('\n');
+
+            const blob = new Blob([emails], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'agent-emails.txt';
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+            alert(`Exported ${agents.length} email addresses`);
+        }
+
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+
+            alert('Data exported successfully!');
+        }
+
+        function refreshData() {
+            loadDashboard();
+            alert('Dashboard refreshed!');
+        }
+
+        function resetDemo() {
+            if (confirm('⚠️ WARNING: This will delete ALL game data!\n\nAre you sure?')) {
+                if (confirm('This action cannot be undone. Continue?')) {
+                    // Clear all oracle7 data
+                    const toDelete = [];
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key.startsWith('oracle7_')) {
+                            toDelete.push(key);
+                        }
+                    }
+
+                    toDelete.forEach(key => localStorage.removeItem(key));
+
+                    alert(`Deleted ${toDelete.length} agent records`);
+                    loadDashboard();
+                }
+            }
+        }
+
+        // Load on page load
+        window.onload = loadDashboard;
+    </script>
+</body>
+</html>

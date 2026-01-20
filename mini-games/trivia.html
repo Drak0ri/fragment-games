@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Quick Trivia</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #A8E6CF 0%, #56CCF2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #56CCF2;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .progress {
+            text-align: center;
+            font-size: 1.5em;
+            margin-bottom: 30px;
+            color: #56CCF2;
+            font-weight: 700;
+        }
+
+        .question-card {
+            background: #E8F9FD;
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            min-height: 200px;
+        }
+
+        .question {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .option {
+            padding: 20px;
+            background: white;
+            border: 3px solid #56CCF2;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1.2em;
+            text-align: center;
+        }
+
+        .option:hover {
+            transform: translateX(10px);
+            box-shadow: 0 5px 20px rgba(86, 204, 242, 0.3);
+            background: #E8F9FD;
+        }
+
+        .option.correct {
+            background: #4CAF50;
+            color: white;
+            border-color: #4CAF50;
+        }
+
+        .option.incorrect {
+            background: #F44336;
+            color: white;
+            border-color: #F44336;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.3em;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #A8E6CF 0%, #56CCF2 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(86, 204, 242, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(86, 204, 242, 0.4);
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: #E8F9FD;
+            border-radius: 20px;
+        }
+
+        .reward {
+            font-size: 3em;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Quick Trivia</h1>
+
+        <div class="progress" id="progress">Question 1/10</div>
+
+        <div class="question-card" id="questionCard">
+            <div class="question" id="question"></div>
+            <div class="options" id="options"></div>
+        </div>
+
+        <button class="btn" id="startBtn" onclick="startQuiz()">START QUIZ</button>
+
+        <div class="results" id="results">
+            <h2 style="color: #56CCF2;">Quiz Complete!</h2>
+            <div class="reward" id="rewardDisplay"></div>
+            <div id="statsDisplay"></div>
+            <button class="btn" onclick="location.href='../games/oracle-7/dashboard.html'">Back to Game</button>
+            <button class="btn" onclick="resetQuiz()" style="margin-top: 10px;">Try Again</button>
+        </div>
+    </div>
+
+    <script src="../shared/js/auth.js"></script>
+    <script>
+        const questions = [
+            {
+                q: "What does CPU stand for?",
+                options: ["Central Processing Unit", "Computer Personal Unit", "Central Program Utility", "Computer Processing Unit"],
+                answer: 0
+            },
+            {
+                q: "Which planet is known as the Red Planet?",
+                options: ["Venus", "Mars", "Jupiter", "Saturn"],
+                answer: 1
+            },
+            {
+                q: "What is 7 × 8?",
+                options: ["54", "56", "48", "64"],
+                answer: 1
+            },
+            {
+                q: "What is the capital of France?",
+                options: ["London", "Berlin", "Paris", "Madrid"],
+                answer: 2
+            },
+            {
+                q: "How many continents are there?",
+                options: ["5", "6", "7", "8"],
+                answer: 2
+            },
+            {
+                q: "What does HTML stand for?",
+                options: ["Hyper Text Markup Language", "Home Tool Markup Language", "Hyperlinks Text Mark Language", "Hyper Tool Multi Language"],
+                answer: 0
+            },
+            {
+                q: "What is the largest ocean on Earth?",
+                options: ["Atlantic", "Indian", "Arctic", "Pacific"],
+                answer: 3
+            },
+            {
+                q: "What year did World War II end?",
+                options: ["1943", "1944", "1945", "1946"],
+                answer: 2
+            },
+            {
+                q: "What is the speed of light?",
+                options: ["300,000 km/s", "150,000 km/s", "450,000 km/s", "600,000 km/s"],
+                answer: 0
+            },
+            {
+                q: "Who painted the Mona Lisa?",
+                options: ["Van Gogh", "Picasso", "Leonardo da Vinci", "Michelangelo"],
+                answer: 2
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = false;
+
+        function startQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answered = false;
+
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('questionCard').style.display = 'block';
+
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentQuestion >= questions.length) {
+                endQuiz();
+                return;
+            }
+
+            answered = false;
+            const q = questions[currentQuestion];
+
+            document.getElementById('progress').textContent = `Question ${currentQuestion + 1}/${questions.length}`;
+            document.getElementById('question').textContent = q.q;
+
+            const optionsHTML = q.options.map((option, index) =>
+                `<div class="option" onclick="selectAnswer(${index})">${option}</div>`
+            ).join('');
+
+            document.getElementById('options').innerHTML = optionsHTML;
+        }
+
+        function selectAnswer(selected) {
+            if (answered) return;
+
+            answered = true;
+            const q = questions[currentQuestion];
+            const options = document.querySelectorAll('.option');
+
+            options.forEach((option, index) => {
+                if (index === q.answer) {
+                    option.classList.add('correct');
+                } else if (index === selected) {
+                    option.classList.add('incorrect');
+                }
+                option.style.pointerEvents = 'none';
+            });
+
+            if (selected === q.answer) {
+                score++;
+            }
+
+            setTimeout(() => {
+                currentQuestion++;
+                showQuestion();
+            }, 1500);
+        }
+
+        function endQuiz() {
+            document.getElementById('questionCard').style.display = 'none';
+
+            // Calculate reward
+            let currency = 0;
+            let message = '';
+
+            const percentage = (score / questions.length) * 100;
+
+            if (percentage === 100) {
+                currency = 30;
+                message = '🔥 PERFECT! Trivia Master!';
+            } else if (percentage >= 80) {
+                currency = 25;
+                message = '⭐ Excellent! Great Knowledge!';
+            } else if (percentage >= 60) {
+                currency = 20;
+                message = '👍 Good Job! Well Done!';
+            } else if (percentage >= 40) {
+                currency = 15;
+                message = '💪 Not Bad! Keep Learning!';
+            } else {
+                currency = 10;
+                message = '📚 Keep Studying!';
+            }
+
+            // Save reward
+            saveReward(currency);
+
+            // Show results
+            document.getElementById('rewardDisplay').textContent = `+${currency} ⚡`;
+            document.getElementById('statsDisplay').innerHTML = `
+                <p style="font-size: 1.5em; margin: 10px 0;">${message}</p>
+                <p style="font-size: 1.2em; margin: 10px 0;">Score: ${score}/${questions.length} (${percentage}%)</p>
+            `;
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function saveReward(currency) {
+            const agent = getAgent();
+            if (!agent) return;
+
+            const gameState = JSON.parse(localStorage.getItem(`oracle7_${agent.id}`) || '{}');
+            gameState.currency = (gameState.currency || 0) + currency;
+            gameState.hints = (gameState.hints || 0) + Math.floor(currency / 20);
+            gameState.miniGamesPlayed = (gameState.miniGamesPlayed || 0) + 1;
+
+            localStorage.setItem(`oracle7_${agent.id}`, JSON.stringify(gameState));
+        }
+
+        function resetQuiz() {
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('questionCard').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

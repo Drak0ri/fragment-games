@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 Memory Match</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #6BCF7F 0%, #4CAF50 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #E8F5E9;
+            border-radius: 20px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #4CAF50;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #6BCF7F 0%, #4CAF50 100%);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .card.flipped {
+            background: white;
+            border: 3px solid #4CAF50;
+        }
+
+        .card.matched {
+            background: #C8E6C9;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+
+        .card.hidden {
+            font-size: 0;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.3em;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #6BCF7F 0%, #4CAF50 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 25px rgba(76, 175, 80, 0.3);
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(76, 175, 80, 0.4);
+        }
+
+        .results {
+            display: none;
+            text-align: center;
+            padding: 30px;
+            background: #E8F5E9;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+
+        .results h2 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+
+        .reward {
+            font-size: 3em;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Memory Match</h1>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="moves">0</div>
+                <div class="stat-label">Moves</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="matches">0</div>
+                <div class="stat-label">Matches</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="timer">0</div>
+                <div class="stat-label">Time (s)</div>
+            </div>
+        </div>
+
+        <div class="game-grid" id="gameGrid"></div>
+
+        <button class="btn" id="startBtn" onclick="startGame()">START GAME</button>
+
+        <div class="results" id="results">
+            <h2>Congratulations!</h2>
+            <div class="reward" id="rewardDisplay"></div>
+            <div id="statsDisplay"></div>
+            <button class="btn" onclick="location.href='../games/oracle-7/dashboard.html'">Back to Game</button>
+            <button class="btn" onclick="resetGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script src="../shared/js/auth.js"></script>
+    <script>
+        const emojis = ['🎮', '🚀', '⭐', '🔥', '💎', '🎯', '⚡', '🌟'];
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let moves = 0;
+        let startTime = null;
+        let timerInterval = null;
+        let isPlaying = false;
+
+        function startGame() {
+            // Create card pairs
+            cards = [...emojis, ...emojis]
+                .sort(() => Math.random() - 0.5)
+                .map((emoji, index) => ({
+                    id: index,
+                    emoji: emoji,
+                    flipped: false,
+                    matched: false
+                }));
+
+            // Reset state
+            flippedCards = [];
+            matchedPairs = 0;
+            moves = 0;
+            isPlaying = true;
+            startTime = Date.now();
+
+            // Render cards
+            renderCards();
+
+            // Start timer
+            timerInterval = setInterval(updateTimer, 100);
+
+            // Hide start button and results
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('results').style.display = 'none';
+
+            // Reset stats
+            document.getElementById('moves').textContent = '0';
+            document.getElementById('matches').textContent = '0';
+            document.getElementById('timer').textContent = '0';
+        }
+
+        function renderCards() {
+            const grid = document.getElementById('gameGrid');
+            grid.innerHTML = cards.map(card => `
+                <div class="card ${card.flipped ? 'flipped' : 'hidden'} ${card.matched ? 'matched' : ''}"
+                     onclick="flipCard(${card.id})">
+                    ${card.flipped || card.matched ? card.emoji : '?'}
+                </div>
+            `).join('');
+        }
+
+        function flipCard(id) {
+            if (!isPlaying) return;
+
+            const card = cards[id];
+
+            // Ignore if already flipped or matched
+            if (card.flipped || card.matched) return;
+
+            // Ignore if already have 2 flipped
+            if (flippedCards.length >= 2) return;
+
+            // Flip card
+            card.flipped = true;
+            flippedCards.push(card);
+            renderCards();
+
+            // Check for match
+            if (flippedCards.length === 2) {
+                moves++;
+                document.getElementById('moves').textContent = moves;
+
+                setTimeout(checkMatch, 800);
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+
+            if (card1.emoji === card2.emoji) {
+                // Match!
+                card1.matched = true;
+                card2.matched = true;
+                matchedPairs++;
+                document.getElementById('matches').textContent = matchedPairs;
+
+                // Check if game complete
+                if (matchedPairs === emojis.length) {
+                    endGame();
+                }
+            } else {
+                // No match
+                card1.flipped = false;
+                card2.flipped = false;
+            }
+
+            flippedCards = [];
+            renderCards();
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById('timer').textContent = elapsed;
+        }
+
+        function endGame() {
+            isPlaying = false;
+            clearInterval(timerInterval);
+
+            const finalTime = Math.floor((Date.now() - startTime) / 1000);
+
+            // Calculate reward
+            let currency = 0;
+            let message = '';
+
+            if (finalTime <= 30 && moves <= 20) {
+                currency = 30;
+                message = '🔥 INCREDIBLE! Memory Master!';
+            } else if (finalTime <= 45 && moves <= 25) {
+                currency = 20;
+                message = '⭐ Excellent! Great Memory!';
+            } else if (finalTime <= 60) {
+                currency = 15;
+                message = '👍 Good Job! Well Done!';
+            } else {
+                currency = 10;
+                message = '💪 Nice Try! Keep Practicing!';
+            }
+
+            // Save reward
+            saveReward(currency);
+
+            // Show results
+            document.getElementById('rewardDisplay').textContent = `+${currency} ⚡`;
+            document.getElementById('statsDisplay').innerHTML = `
+                <p style="font-size: 1.5em; margin: 10px 0;">${message}</p>
+                <p style="font-size: 1.2em; margin: 10px 0;">Time: ${finalTime}s | Moves: ${moves}</p>
+            `;
+            document.getElementById('results').style.display = 'block';
+        }
+
+        function saveReward(currency) {
+            const agent = getAgent();
+            if (!agent) return;
+
+            const gameState = JSON.parse(localStorage.getItem(`oracle7_${agent.id}`) || '{}');
+            gameState.currency = (gameState.currency || 0) + currency;
+            gameState.hints = (gameState.hints || 0) + Math.floor(currency / 20);
+            gameState.miniGamesPlayed = (gameState.miniGamesPlayed || 0) + 1;
+
+            localStorage.setItem(`oracle7_${agent.id}`, JSON.stringify(gameState));
+        }
+
+        function resetGame() {
+            document.getElementById('startBtn').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+        }
+
+        // Initialize grid
+        renderCards();
+    </script>
+</body>
+</html>

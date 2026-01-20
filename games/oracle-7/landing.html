@@ -157,24 +157,48 @@
         </div>
     </div>
     
+    <script src="../../shared/js/auth.js"></script>
     <script>
+        // Check if already logged in
+        if (isLoggedIn()) {
+            const agent = getAgent();
+            if (confirm(`Welcome back, ${agent.id}!\n\nContinue your mission?`)) {
+                window.location.href = 'dashboard.html';
+            } else {
+                logoutAgent();
+            }
+        }
+
         function beginMission() {
-            const email = document.getElementById('email').value;
-            
-            if (!email || !email.includes('@')) {
-                alert('ERROR: Valid email required for recovery protocol');
+            const email = document.getElementById('email').value.trim();
+
+            // Validate email
+            if (!isValidEmail(email)) {
+                alert('ERROR: Valid email required for recovery protocol\nFormat: name@domain.com');
                 return;
             }
-            
-            // Here you'd send email to backend to create agent profile
-            console.log('Creating agent profile for:', email);
-            
-            // Redirect to main game dashboard
-            // window.location.href = 'dashboard.html?agent=' + btoa(email);
-            
-            // For now, just show confirmation
-            alert('AGENT REGISTERED\nProfile created\nCheck your email for Agent ID\nRedirecting to mission control...');
+
+            try {
+                // Register agent
+                const agent = registerAgent(email);
+
+                // Show success message
+                alert(`✓ AGENT REGISTERED\n\nAgent ID: ${agent.id}\nEmail: ${email}\n\nInitializing mission control...`);
+
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
+
+            } catch (error) {
+                alert('ERROR: Registration failed\n' + error.message);
+            }
         }
+
+        // Allow Enter key to submit
+        document.getElementById('email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                beginMission();
+            }
+        });
     </script>
 </body>
 </html>
