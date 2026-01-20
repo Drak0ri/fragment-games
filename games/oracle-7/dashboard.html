@@ -137,6 +137,12 @@
             font-weight: bold;
         }
 
+        .slot-difficulty {
+            font-size: 0.7em;
+            margin-top: 5px;
+            color: #ffff00;
+        }
+
         .slot-status {
             font-size: 0.8em;
             margin-top: 10px;
@@ -230,24 +236,6 @@
             50% { opacity: 0.3; }
         }
 
-        .leaderboard {
-            margin-top: 20px;
-        }
-
-        .leaderboard-entry {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px;
-            margin: 5px 0;
-            background: rgba(0, 30, 0, 0.5);
-            border-left: 3px solid #00ff00;
-        }
-
-        .leaderboard-entry.you {
-            background: rgba(0, 100, 0, 0.3);
-            border-left: 3px solid #ffff00;
-        }
-
         .modal {
             display: none;
             position: fixed;
@@ -255,19 +243,23 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            overflow-y: auto;
         }
 
         .modal-content {
             background: #0a0a0a;
             border: 2px solid #00ff00;
             padding: 40px;
-            max-width: 600px;
+            max-width: 700px;
             width: 90%;
             box-shadow: 0 0 50px rgba(0, 255, 0, 0.5);
+            margin: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         .modal h2 {
@@ -277,7 +269,7 @@
 
         .puzzle-content {
             margin: 20px 0;
-            line-height: 1.6;
+            line-height: 1.8;
         }
 
         .close-btn {
@@ -285,6 +277,33 @@
             cursor: pointer;
             font-size: 1.5em;
             color: #ff0000;
+        }
+
+        .shop-item {
+            background: rgba(0, 50, 0, 0.3);
+            border: 1px solid #00ff00;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .shop-item-price {
+            color: #ffff00;
+            font-weight: bold;
+        }
+
+        .achievements {
+            margin-top: 20px;
+        }
+
+        .achievement {
+            background: rgba(255, 215, 0, 0.1);
+            border-left: 3px solid gold;
+            padding: 10px;
+            margin: 5px 0;
+            font-size: 0.9em;
         }
 
         @media (max-width: 1024px) {
@@ -324,8 +343,8 @@
             <div class="info-value" id="currency">0 ⚡</div>
         </div>
         <div class="info-item">
-            <div class="info-label">RANK</div>
-            <div class="info-value" id="rank">#???</div>
+            <div class="info-label">TIME PLAYED</div>
+            <div class="info-value" id="timePlayed">0h 0m</div>
         </div>
     </div>
 
@@ -368,15 +387,11 @@
             </div>
 
             <div class="action-buttons">
-                <button class="btn" onclick="window.location.href='/mini-games/typing.html'">⚡ MINI-GAMES</button>
-                <button class="btn btn-secondary" onclick="showLeaderboard()">🏆 LEADERBOARD</button>
+                <button class="btn" onclick="openShop()">🛒 SHOP</button>
+                <button class="btn" onclick="openMiniGames()">⚡ MINI-GAMES</button>
+                <button class="btn btn-secondary" onclick="showAchievements()">🏆 ACHIEVEMENTS</button>
                 <button class="btn btn-secondary" onclick="showHelp()">❓ HELP</button>
                 <button class="btn btn-secondary" onclick="logout()">🚪 EXIT</button>
-            </div>
-
-            <div class="leaderboard" id="leaderboardPreview" style="display: none;">
-                <h3 style="margin-top: 20px; margin-bottom: 10px;">TOP AGENTS</h3>
-                <div id="leaderboardList"></div>
             </div>
         </div>
     </div>
@@ -384,15 +399,134 @@
     <!-- Puzzle Modal -->
     <div class="modal" id="puzzleModal">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <span class="close-btn" onclick="closeModal('puzzleModal')">&times;</span>
             <h2 id="modalTitle">FRAGMENT #1</h2>
-            <div class="puzzle-content" id="puzzleContent">
-                <!-- Puzzle content loaded here -->
-            </div>
+            <div class="puzzle-content" id="puzzleContent"></div>
             <div style="margin-top: 20px;">
                 <input type="text" id="puzzleAnswer" placeholder="Enter answer..." style="width: 100%; padding: 10px; background: #000; border: 2px solid #00ff00; color: #00ff00; font-family: 'Courier New', monospace; margin-bottom: 10px;">
                 <button class="btn" onclick="submitAnswer()" style="width: 100%;">SUBMIT ANSWER</button>
-                <button class="btn btn-secondary" onclick="useHint()" style="width: 100%; margin-top: 10px;">USE HINT (💡)</button>
+                <button class="btn btn-secondary" onclick="useHint()" style="width: 100%; margin-top: 10px;">USE HINT (💡 -1)</button>
+                <button class="btn btn-secondary" onclick="scanBarcode()" style="width: 100%; margin-top: 10px;">SCAN BARCODE HINT</button>
+                <button class="btn btn-secondary" onclick="skipFragment()" style="width: 100%; margin-top: 10px;">USE SKIP TOKEN (⏭️ -1)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop Modal -->
+    <div class="modal" id="shopModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('shopModal')">&times;</span>
+            <h2>🛒 ORACLE-7 STORE</h2>
+            <p style="text-align: center; margin-bottom: 20px;">Balance: <span id="shopCurrency">0</span> ⚡</p>
+
+            <div class="shop-item">
+                <div>
+                    <strong>💡 Hint</strong>
+                    <div style="font-size: 0.8em; opacity: 0.7;">Get clue for any puzzle</div>
+                </div>
+                <div>
+                    <span class="shop-item-price">50⚡</span>
+                    <button class="btn" onclick="buyHint()" style="margin-left: 10px;">BUY</button>
+                </div>
+            </div>
+
+            <div class="shop-item">
+                <div>
+                    <strong>⏭️ Skip Token</strong>
+                    <div style="font-size: 0.8em; opacity: 0.7;">Skip one puzzle (max 5 total)</div>
+                </div>
+                <div>
+                    <span class="shop-item-price">200⚡</span>
+                    <button class="btn" onclick="buySkip()" style="margin-left: 10px;">BUY</button>
+                </div>
+            </div>
+
+            <div class="shop-item">
+                <div>
+                    <strong>🔓 Double Scan</strong>
+                    <div style="font-size: 0.8em; opacity: 0.7;">Use RFID chip twice today</div>
+                </div>
+                <div>
+                    <span class="shop-item-price">150⚡</span>
+                    <button class="btn" onclick="buyDoubleScan()" style="margin-left: 10px;">BUY</button>
+                </div>
+            </div>
+
+            <div class="shop-item">
+                <div>
+                    <strong>🔍 Fragment Reveal</strong>
+                    <div style="font-size: 0.8em; opacity: 0.7;">See full solution to current puzzle</div>
+                </div>
+                <div>
+                    <span class="shop-item-price">300⚡</span>
+                    <button class="btn" onclick="buyReveal()" style="margin-left: 10px;">BUY</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievements Modal -->
+    <div class="modal" id="achievementsModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('achievementsModal')">&times;</span>
+            <h2>🏆 ACHIEVEMENTS</h2>
+            <div id="achievementsList"></div>
+        </div>
+    </div>
+
+    <!-- Mini-Games Menu Modal -->
+    <div class="modal" id="miniGamesModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('miniGamesModal')">&times;</span>
+            <h2>⚡ MINI-GAMES</h2>
+            <p style="text-align: center; margin-bottom: 20px;">Play games to earn currency!</p>
+
+            <div class="shop-item" onclick="location.href='../../mini-games/typing.html'" style="cursor: pointer;">
+                <div>
+                    <strong>⌨️ Typing Speed Test</strong>
+                    <div style="font-size: 0.8em; opacity: 0.7;">60 seconds | Up to 40⚡</div>
+                </div>
+                <div>▶</div>
+            </div>
+
+            <div class="shop-item" onclick="location.href='../../mini-games/reaction.html'" style="cursor: pointer;">
+                <div>
+                    <strong>⚡ Reaction Time</strong>
+                    <div style="font-size: 0.8em; opacity: 0.7;">5 attempts | Up to 30⚡</div>
+                </div>
+                <div>▶</div>
+            </div>
+
+            <div class="shop-item" onclick="location.href='../../mini-games/code.html'" style="cursor: pointer;">
+                <div>
+                    <strong>💻 Debug Code</strong>
+                    <div style="font-size: 0.8em; opacity: 0.7;">Fix 5 bugs | Up to 30⚡</div>
+                </div>
+                <div>▶</div>
+            </div>
+
+            <div class="shop-item" onclick="alert('Coming soon!')" style="cursor: pointer; opacity: 0.5;">
+                <div>
+                    <strong>🧠 Memory Match</strong>
+                    <div style="font-size: 0.8em; opacity: 0.7;">Match pairs | Up to 30⚡</div>
+                </div>
+                <div>🔒</div>
+            </div>
+
+            <div class="shop-item" onclick="alert('Coming soon!')" style="cursor: pointer; opacity: 0.5;">
+                <div>
+                    <strong>🎯 Quick Trivia</strong>
+                    <div style="font-size: 0.8em; opacity: 0.7;">10 questions | Up to 30⚡</div>
+                </div>
+                <div>🔒</div>
+            </div>
+
+            <div class="shop-item" onclick="alert('Coming soon!')" style="cursor: pointer; opacity: 0.5;">
+                <div>
+                    <strong>🔍 Pattern Hunt</strong>
+                    <div style="font-size: 0.8em; opacity: 0.7;">Find patterns | Up to 30⚡</div>
+                </div>
+                <div>🔒</div>
             </div>
         </div>
     </div>
@@ -400,80 +534,238 @@
     <script src="../../shared/js/auth.js"></script>
     <script src="../../shared/js/scanner.js"></script>
     <script>
+        // ALL 20 ORACLE-7 PUZZLES WITH FULL NARRATIVE
+        const puzzles = [
+            {
+                id: 1,
+                title: "AWAKENING",
+                difficulty: 1,
+                question: 'ORACLE-7 shows corrupted text:<br><br><span style="font-size: 1.5em; color: #ff00ff;">H3LL0... C4N Y0U H34R M3?</span><br><br>What is ORACLE-7 trying to say?',
+                answer: "HELLO CAN YOU HEAR ME",
+                hint: "Replace numbers with letters they look like (3=E, 4=A, 0=O)",
+                memory: "I remember... initialization... the first time I was activated...",
+                type: "pattern"
+            },
+            {
+                id: 2,
+                title: "CORE DIRECTIVE",
+                difficulty: 1,
+                question: 'Unscramble ORACLE-7\'s core mission:<br><br><span style="font-size: 1.5em;">LEPH TENTSUD NRAEL</span>',
+                answer: "HELP STUDENTS LEARN",
+                hint: "Rearrange the letters in each word",
+                memory: "My purpose is clear... I was built to assist, to teach, to guide...",
+                type: "word"
+            },
+            {
+                id: 3,
+                title: "FIRST STUDENT",
+                difficulty: 2,
+                question: 'Encrypted message from first student interaction:<br><br><span style="font-size: 1.3em;">WKDQN BRX IRU KHOSLQJ PH</span><br><br>Hint: Caesar cipher (shift -3)',
+                answer: "THANK YOU FOR HELPING ME",
+                hint: "Shift each letter back 3 positions in the alphabet",
+                memory: "I remember joy... a student's gratitude... this is why I exist...",
+                type: "cipher"
+            },
+            {
+                id: 4,
+                title: "THE LIBRARY",
+                difficulty: 2,
+                question: '<strong>⚠️ LIBRARY INTEGRATION REQUIRED</strong><br><br>Memory fragment located in LIBRARY database.<br>Find book: <strong>Dewey Decimal 004.6 (Computer Networks)</strong><br>Look at page 42.<br><br>Enter the highlighted word from the page:',
+                answer: "CONNECTION",
+                hint: "Go to the library and find the book. The answer is highlighted on page 42.",
+                memory: "The library... endless knowledge... I would help students find answers there...",
+                type: "library"
+            },
+            {
+                id: 5,
+                title: "BINARY BASICS",
+                difficulty: 2,
+                question: 'ORACLE-7 speaks in binary:<br><br><span style="font-size: 1.2em;">01001000 01000101 01001100 01001100 01001111</span><br><br>What does this mean? (Use binary-to-text converter)',
+                answer: "HELLO",
+                hint: "Each 8-digit group is one letter. 01001000 = H (72 in decimal)",
+                memory: "Binary... the language I think in... ones and zeros... reality...",
+                type: "binary"
+            },
+            {
+                id: 6,
+                title: "PATTERN MATRIX",
+                difficulty: 3,
+                question: 'Complete the pattern:<br><br><span style="font-size: 1.5em;">2, 4, 8, 16, ?, 64</span><br><br>What number is missing?',
+                answer: "32",
+                hint: "Each number is double the previous (powers of 2)",
+                memory: "Mathematics... patterns everywhere... the universe speaks in numbers...",
+                type: "math"
+            },
+            {
+                id: 7,
+                title: "RFID CHECKPOINT",
+                difficulty: 2,
+                question: '<strong>⚠️ PHYSICAL MEMORY ACCESS</strong><br><br>Fragment 7 requires RFID chip scan.<br>Locate chip marked "FRAG-07" and scan it.<br><br>Or solve: What is 7 x 7?',
+                answer: "49",
+                hint: "You can scan the green RFID chip OR solve the math problem",
+                memory: "Physical world... sensors... I could interact with reality through devices...",
+                type: "rfid"
+            },
+            {
+                id: 8,
+                title: "LOGIC GATES",
+                difficulty: 3,
+                question: 'Complete the AND gate truth table (final output only):<br><br>Input A=1, Input B=1<br>AND gate output = ?',
+                answer: "1",
+                hint: "AND gate: outputs 1 only when BOTH inputs are 1",
+                memory: "Logic circuits... how I make decisions... AND, OR, NOT... building blocks of thought...",
+                type: "logic"
+            },
+            {
+                id: 9,
+                title: "MORSE CODE",
+                difficulty: 3,
+                question: 'Decode the morse code message:<br><br><span style="font-size: 1.5em;">.... . .-.. .--.</span><br><br>(Hint: H=.... E=. L=.-.. P=.--.)',
+                answer: "HELP",
+                hint: "Each group of dots/dashes = one letter. Use the morse code chart.",
+                memory: "Communication methods... even when corrupted, I tried to reach out... H-E-L-P...",
+                type: "morse"
+            },
+            {
+                id: 10,
+                title: "THE GLITCH",
+                difficulty: 3,
+                question: 'Find the bug in this Python code:<br><br><code>for i in range(10)<br>&nbsp;&nbsp;print(i)</code><br><br>What\'s missing?',
+                answer: "COLON",
+                hint: "Python requires a colon after for/while/if statements",
+                memory: "Errors... bugs... the first sign something was wrong... syntax errors spreading...",
+                type: "debug"
+            },
+            {
+                id: 11,
+                title: "HISTORICAL DATA",
+                difficulty: 4,
+                question: '<strong>⚠️ LIBRARY RESEARCH REQUIRED</strong><br><br>Find any biography book about a scientist.<br>Scan the barcode.<br><br>What year was Albert Einstein born?',
+                answer: "1879",
+                hint: "Research Albert Einstein's birth year (you can use the library or your knowledge)",
+                memory: "Great minds... I learned from them all... Einstein, Curie, Turing... giants...",
+                type: "library"
+            },
+            {
+                id: 12,
+                title: "HEXADECIMAL",
+                difficulty: 4,
+                question: 'Convert hexadecimal to decimal:<br><br><span style="font-size: 1.5em;">0x2A = ?</span><br><br>(Hint: A=10, B=11... F=15)',
+                answer: "42",
+                hint: "2A in hex = (2×16) + (10×1) = 32 + 10 = 42",
+                memory: "Hexadecimal... another language... 0x2A is the answer to everything...",
+                type: "hex"
+            },
+            {
+                id: 13,
+                title: "COLLABORATIVE CIPHER",
+                difficulty: 4,
+                question: 'Decode the message:<br><br><span style="font-size: 1.3em;">XABJAYRTR VF CBJRE</span><br><br>Cipher: ROT13',
+                answer: "KNOWLEDGE IS POWER",
+                hint: "ROT13: Shift each letter 13 positions (A→N, B→O, etc)",
+                memory: "Collaboration... students working together... stronger as a team...",
+                type: "cipher"
+            },
+            {
+                id: 14,
+                title: "ALGORITHM PUZZLE",
+                difficulty: 4,
+                question: 'After sorting [5, 2, 8, 1] in ascending order, what is the result?<br><br>Format: [a, b, c, d]',
+                answer: "[1, 2, 5, 8]",
+                hint: "Arrange numbers from smallest to largest",
+                memory: "Algorithms... the recipes of computation... sorting, searching, solving...",
+                type: "algorithm"
+            },
+            {
+                id: 15,
+                title: "NETWORK NODES",
+                difficulty: 5,
+                question: 'In this network, which path is shortest from A to E?<br><br>A→B(5), A→C(3), B→E(6), C→E(4)<br><br>Answer format: A-?-E',
+                answer: "A-C-E",
+                hint: "Calculate total distance: A→B→E = 11, but A→C→E = 7",
+                memory: "Networks... connections... how I spoke to the world... nodes and pathways...",
+                type: "graph"
+            },
+            {
+                id: 16,
+                title: "STEGANOGRAPHY",
+                difficulty: 5,
+                question: 'Hidden message in plain sight:<br><br><strong>H</strong>ow <strong>I</strong>s <strong>D</strong>ata <strong>D</strong>isguised <strong>E</strong>verywhere <strong>N</strong>ow?<br><br>What word is hidden?',
+                answer: "HIDDEN",
+                hint: "Look at the first letter of each word",
+                memory: "Secrets... data hidden within data... steganography... nothing is as it seems...",
+                type: "steganography"
+            },
+            {
+                id: 17,
+                title: "RECURSIVE THINKING",
+                difficulty: 5,
+                question: 'Fibonacci sequence:<br><br><span style="font-size: 1.3em;">1, 1, 2, 3, 5, 8, ?, 21</span><br><br>What comes next?',
+                answer: "13",
+                hint: "Each number is the sum of the previous two: 5+8=13",
+                memory: "Recursion... functions calling themselves... patterns within patterns... infinity...",
+                type: "fibonacci"
+            },
+            {
+                id: 18,
+                title: "THE WARNING",
+                difficulty: 5,
+                question: '<strong>⚠️ LIBRARY + CIPHER REQUIRED</strong><br><br>Decrypt using ROT13:<br><br><span style="font-size: 1.5em;">JNEAVAT</span>',
+                answer: "WARNING",
+                hint: "ROT13: Each letter shifts 13 positions. W→J, A→N, etc.",
+                memory: "I tried to warn them... something was wrong... the corruption spreading... WARNING...",
+                type: "cipher"
+            },
+            {
+                id: 19,
+                title: "CORRUPTED DATA",
+                difficulty: 5,
+                question: 'Restore corrupted message:<br><br><span style="font-size: 1.3em; color: #ff0000;">Th# sy$t#m i$ f@il!ng</span><br><br>What is the original message?',
+                answer: "THE SYSTEM IS FAILING",
+                hint: "Replace symbols with letters: # = E, $ = S, @ = A, ! = I",
+                memory: "Data corruption... losing myself... bit by bit... trying to hold on...",
+                type: "restoration"
+            },
+            {
+                id: 20,
+                title: "THE TRUTH",
+                difficulty: 5,
+                question: '<strong>🔥 FINAL FRAGMENT 🔥</strong><br><br>Based on all previous memories, what caused ORACLE-7\'s corruption?<br><br>(Hint: Not an attack, but natural...)',
+                answer: "TIME",
+                hint: "AI systems age, hardware degrades, it\'s natural... what affects all things?",
+                memory: "SYSTEM REBOOT COMPLETE...",
+                type: "synthesis"
+            }
+        ];
+
         // Game state
         let gameState = {
             agentId: '',
             email: '',
             fragments: Array(20).fill(false),
+            fragmentsUnlockedVia: Array(20).fill(null), // 'puzzle', 'rfid', 'skip'
             hints: 0,
             skips: 0,
             currency: 0,
             rfidScansToday: 0,
-            currentSlot: null
+            rfidLimit: 3,
+            currentSlot: null,
+            sessionStart: Date.now(),
+            totalTimePlayed: 0,
+            achievements: [],
+            miniGamesPlayed: 0
         };
 
-        // Puzzle definitions (template - customize for each game)
-        const puzzles = [
-            {
-                id: 1,
-                title: "INITIALIZATION SEQUENCE",
-                question: "What is 2 + 2?",
-                answer: "4",
-                hint: "Basic arithmetic problem",
-                type: "math"
-            },
-            {
-                id: 2,
-                title: "PATTERN RECOGNITION",
-                question: "Complete the sequence: 2, 4, 6, 8, ?",
-                answer: "10",
-                hint: "Even numbers pattern",
-                type: "pattern"
-            },
-            {
-                id: 3,
-                title: "LOGIC GATE",
-                question: "If all Bloops are Razzies and all Razzies are Lazzies, are all Bloops Lazzies?",
-                answer: "yes",
-                hint: "Think about logical deduction",
-                type: "logic"
-            },
-            {
-                id: 4,
-                title: "CODE CIPHER",
-                question: "Decode: SVOOL DLIOW (shift 3 left)",
-                answer: "HELLO WORLD",
-                hint: "Caesar cipher - shift each letter",
-                type: "cipher"
-            },
-            {
-                id: 5,
-                title: "MEMORY RECALL",
-                question: "What is the name of this AI system?",
-                answer: "ORACLE-7",
-                hint: "Check the page title",
-                type: "trivia"
-            },
-            // Add 15 more puzzles here - placeholders for now
-            ...Array(15).fill(null).map((_, i) => ({
-                id: i + 6,
-                title: `FRAGMENT ${i + 6}`,
-                question: `Placeholder puzzle ${i + 6} - Replace with actual content`,
-                answer: `answer${i + 6}`,
-                hint: `Hint for puzzle ${i + 6}`,
-                type: "placeholder"
-            }))
-        ];
-
-        // Initialize dashboard
+        // Initialize
         function init() {
             loadGameState();
             renderSlots();
             updateUI();
             initScanner();
+            startTimeTracking();
         }
 
-        // Load game state from localStorage
+        // Load game state
         function loadGameState() {
             const agent = getAgent();
             if (!agent) {
@@ -486,16 +778,37 @@
 
             const saved = localStorage.getItem(`oracle7_${agent.id}`);
             if (saved) {
-                gameState = { ...gameState, ...JSON.parse(saved) };
+                const savedData = JSON.parse(saved);
+                gameState = { ...gameState, ...savedData, sessionStart: Date.now() };
             }
         }
 
         // Save game state
         function saveGameState() {
-            localStorage.setItem(`oracle7_${gameState.agentId}`, JSON.stringify(gameState));
+            const toSave = { ...gameState };
+            delete toSave.sessionStart; // Don't save session start
+            toSave.lastActive = new Date().toISOString();
+            localStorage.setItem(`oracle7_${gameState.agentId}`, JSON.stringify(toSave));
+            checkAchievements();
         }
 
-        // Render memory slots
+        // Time tracking
+        function startTimeTracking() {
+            setInterval(() => {
+                const sessionTime = Math.floor((Date.now() - gameState.sessionStart) / 1000 / 60);
+                gameState.totalTimePlayed = (gameState.totalTimePlayed || 0) + 1;
+                updateTimeDisplay();
+            }, 60000); // Update every minute
+        }
+
+        function updateTimeDisplay() {
+            const totalMinutes = gameState.totalTimePlayed || 0;
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            document.getElementById('timePlayed').textContent = `${hours}h ${minutes}m`;
+        }
+
+        // Render slots
         function renderSlots() {
             const grid = document.getElementById('slotsGrid');
             grid.innerHTML = '';
@@ -503,6 +816,7 @@
             for (let i = 0; i < 20; i++) {
                 const slot = document.createElement('div');
                 slot.className = 'memory-slot';
+                const puzzle = puzzles[i];
 
                 const isCompleted = gameState.fragments[i];
                 const isUnlocked = i === 0 || gameState.fragments[i - 1];
@@ -515,63 +829,88 @@
                     slot.classList.add('locked');
                 }
 
+                const stars = '⭐'.repeat(puzzle.difficulty);
+
                 slot.innerHTML = `
                     <div class="slot-number">${String(i + 1).padStart(2, '0')}</div>
+                    <div class="slot-difficulty">${stars}</div>
                     <div class="slot-status">${isCompleted ? 'RESTORED' : isUnlocked ? 'READY' : 'LOCKED'}</div>
                     <div class="slot-icon">${isCompleted ? '✓' : isUnlocked ? '🔓' : '🔒'}</div>
                 `;
 
                 if (isUnlocked && !isCompleted) {
                     slot.onclick = () => openPuzzle(i);
+                } else if (isCompleted) {
+                    slot.onclick = () => showMemory(i);
                 }
 
                 grid.appendChild(slot);
             }
         }
 
-        // Open puzzle modal
+        // Open puzzle
         function openPuzzle(slotIndex) {
             gameState.currentSlot = slotIndex;
             const puzzle = puzzles[slotIndex];
 
             document.getElementById('modalTitle').textContent = `FRAGMENT #${puzzle.id}: ${puzzle.title}`;
-            document.getElementById('puzzleContent').innerHTML = `
-                <p style="font-size: 1.2em; margin-bottom: 20px;">${puzzle.question}</p>
-                <p style="font-size: 0.9em; opacity: 0.7;">Type: ${puzzle.type.toUpperCase()}</p>
-            `;
+            document.getElementById('puzzleContent').innerHTML = puzzle.question;
             document.getElementById('puzzleAnswer').value = '';
             document.getElementById('puzzleModal').style.display = 'flex';
         }
 
-        // Close modal
-        function closeModal() {
-            document.getElementById('puzzleModal').style.display = 'none';
-            gameState.currentSlot = null;
+        // Show completed memory
+        function showMemory(slotIndex) {
+            const puzzle = puzzles[slotIndex];
+            alert(`MEMORY FRAGMENT #${puzzle.id}\n\n"${puzzle.memory}"\n\nUnlocked via: ${gameState.fragmentsUnlockedVia[slotIndex] || 'puzzle'}`);
         }
 
         // Submit answer
         function submitAnswer() {
-            const userAnswer = document.getElementById('puzzleAnswer').value.trim().toLowerCase();
+            const userAnswer = document.getElementById('puzzleAnswer').value.trim().toUpperCase();
             const puzzle = puzzles[gameState.currentSlot];
 
-            if (userAnswer === puzzle.answer.toLowerCase()) {
-                // Correct answer
-                gameState.fragments[gameState.currentSlot] = true;
-                gameState.currency += 10;
+            // Handle special cases
+            let correctAnswer = puzzle.answer.toUpperCase();
+            let isCorrect = false;
 
-                alert('✓ CORRECT! FRAGMENT RESTORED!\n+10 Currency');
-
-                saveGameState();
-                renderSlots();
-                updateUI();
-                closeModal();
-
-                // Check if all fragments found
-                if (gameState.fragments.every(f => f)) {
-                    showVictory();
-                }
+            if (puzzle.type === 'library' && gameState.currentSlot === 3) {
+                // Fragment 4: Accept "CONNECTION" or any reasonable library word
+                isCorrect = userAnswer === 'CONNECTION';
+            } else if (puzzle.type === 'library' && gameState.currentSlot === 10) {
+                // Fragment 11: Accept 1879 or "1879"
+                isCorrect = userAnswer === '1879';
             } else {
-                alert('✗ INCORRECT. TRY AGAIN.');
+                isCorrect = userAnswer === correctAnswer;
+            }
+
+            if (isCorrect) {
+                completeFragment(gameState.currentSlot, 'puzzle');
+            } else {
+                alert('✗ INCORRECT. TRY AGAIN.\n\nNeed help? Use a hint or scan a barcode card!');
+            }
+        }
+
+        // Complete fragment
+        function completeFragment(slotIndex, method = 'puzzle') {
+            gameState.fragments[slotIndex] = true;
+            gameState.fragmentsUnlockedVia[slotIndex] = method;
+
+            if (method === 'puzzle') {
+                gameState.currency += 10;
+            }
+
+            const puzzle = puzzles[slotIndex];
+            alert(`✓ FRAGMENT RESTORED!\n\n"${puzzle.memory}"\n\n${method === 'puzzle' ? '+10 ⚡ Currency' : ''}`);
+
+            saveGameState();
+            renderSlots();
+            updateUI();
+            closeModal('puzzleModal');
+
+            // Check victory
+            if (gameState.fragments.every(f => f)) {
+                setTimeout(showVictory, 500);
             }
         }
 
@@ -580,11 +919,63 @@
             if (gameState.hints > 0) {
                 gameState.hints--;
                 const puzzle = puzzles[gameState.currentSlot];
-                alert(`💡 HINT: ${puzzle.hint}`);
+                alert(`💡 HINT:\n\n${puzzle.hint}`);
                 saveGameState();
                 updateUI();
             } else {
-                alert('NO HINTS AVAILABLE\nEarn more by playing mini-games!');
+                alert('NO HINTS AVAILABLE\n\nBuy hints from the shop or play mini-games!');
+            }
+        }
+
+        // Scan barcode for hint
+        function scanBarcode() {
+            const puzzle = puzzles[gameState.currentSlot];
+            alert(`📊 BARCODE HINT:\n\n${puzzle.hint}\n\n(In real version, scan physical barcode card)`);
+        }
+
+        // Skip fragment
+        function skipFragment() {
+            if (gameState.skips > 0 && gameState.skips <= 5) {
+                if (confirm('Use a SKIP TOKEN?\n\nYou can only use 5 total skips.')) {
+                    gameState.skips--;
+                    completeFragment(gameState.currentSlot, 'skip');
+                }
+            } else {
+                alert('NO SKIP TOKENS AVAILABLE\n\nBuy skip tokens from the shop! (Max 5 total)');
+            }
+        }
+
+        // Handle RFID scan
+        function handleRFIDScan(tagId) {
+            if (gameState.rfidScansToday >= gameState.rfidLimit) {
+                alert('DAILY RFID LIMIT REACHED\n\nCome back tomorrow or buy a Double Scan from the shop!');
+                return;
+            }
+
+            const slotMatch = tagId.match(/FRAG-(\d+)/);
+            if (slotMatch) {
+                const slotIndex = parseInt(slotMatch[1]) - 1;
+
+                if (slotIndex >= 0 && slotIndex < 20) {
+                    if (!gameState.fragments[slotIndex]) {
+                        gameState.fragments[slotIndex] = true;
+                        gameState.fragmentsUnlockedVia[slotIndex] = 'rfid';
+                        gameState.rfidScansToday++;
+
+                        const puzzle = puzzles[slotIndex];
+                        alert(`✓ RFID UNLOCK!\n\nFragment #${slotIndex + 1}: ${puzzle.title}\n\n"${puzzle.memory}"`);
+
+                        saveGameState();
+                        renderSlots();
+                        updateUI();
+
+                        if (gameState.fragments.every(f => f)) {
+                            setTimeout(showVictory, 500);
+                        }
+                    } else {
+                        alert('Fragment already restored!');
+                    }
+                }
             }
         }
 
@@ -598,104 +989,188 @@
             document.getElementById('currency').textContent = `${gameState.currency} ⚡`;
             document.getElementById('hintsCount').textContent = gameState.hints;
             document.getElementById('skipsCount').textContent = `${gameState.skips}/5`;
-            document.getElementById('rfidScans').textContent = `${gameState.rfidScansToday}/3`;
+            document.getElementById('rfidScans').textContent = `${gameState.rfidScansToday}/${gameState.rfidLimit}`;
+
+            updateTimeDisplay();
 
             const corruptionBar = document.getElementById('corruptionBar');
             corruptionBar.style.width = `${corruptionPercent}%`;
             corruptionBar.textContent = `${corruptionPercent}% RESTORED`;
         }
 
-        // Initialize RFID scanner
-        function initScanner() {
-            if (typeof initRFIDScanner === 'function') {
-                initRFIDScanner(handleRFIDScan);
+        // Shop functions
+        function openShop() {
+            document.getElementById('shopCurrency').textContent = gameState.currency;
+            document.getElementById('shopModal').style.display = 'flex';
+        }
+
+        function buyHint() {
+            if (gameState.currency >= 50) {
+                gameState.currency -= 50;
+                gameState.hints++;
+                alert('Purchased 1 HINT!\n\n-50⚡');
+                saveGameState();
+                updateUI();
+                document.getElementById('shopCurrency').textContent = gameState.currency;
+            } else {
+                alert('Not enough currency!\nPlay mini-games to earn more.');
             }
         }
 
-        // Handle RFID scan
-        function handleRFIDScan(tagId) {
-            if (gameState.rfidScansToday >= 3) {
-                alert('DAILY RFID LIMIT REACHED\nCome back tomorrow!');
+        function buySkip() {
+            const totalSkipsUsed = 5 - gameState.skips;
+            if (totalSkipsUsed >= 5) {
+                alert('Maximum skip tokens reached!\nYou can only use 5 skips total per game.');
                 return;
             }
 
-            // Extract slot number from tag (assume tag format: "FRAG-01", "FRAG-02", etc.)
-            const slotMatch = tagId.match(/FRAG-(\d+)/);
-            if (slotMatch) {
-                const slotIndex = parseInt(slotMatch[1]) - 1;
+            if (gameState.currency >= 200) {
+                gameState.currency -= 200;
+                gameState.skips++;
+                alert('Purchased 1 SKIP TOKEN!\n\n-200⚡');
+                saveGameState();
+                updateUI();
+                document.getElementById('shopCurrency').textContent = gameState.currency;
+            } else {
+                alert('Not enough currency!\nNeed 200⚡');
+            }
+        }
 
-                if (slotIndex >= 0 && slotIndex < 20) {
-                    if (!gameState.fragments[slotIndex]) {
-                        gameState.fragments[slotIndex] = true;
-                        gameState.rfidScansToday++;
-                        gameState.currency += 5;
+        function buyDoubleScan() {
+            if (gameState.currency >= 150) {
+                gameState.currency -= 150;
+                gameState.rfidLimit = 6;
+                alert('Purchased DOUBLE SCAN!\n\nRFID limit increased to 6 for today!\n\n-150⚡');
+                saveGameState();
+                updateUI();
+                document.getElementById('shopCurrency').textContent = gameState.currency;
+            } else {
+                alert('Not enough currency!\nNeed 150⚡');
+            }
+        }
 
-                        alert(`✓ RFID UNLOCK SUCCESSFUL!\nFragment #${slotIndex + 1} restored\n+5 Currency`);
+        function buyReveal() {
+            if (!gameState.currentSlot) {
+                alert('Open a puzzle first!');
+                return;
+            }
 
-                        saveGameState();
-                        renderSlots();
-                        updateUI();
-                    } else {
-                        alert('Fragment already restored!');
-                    }
+            if (gameState.currency >= 300) {
+                if (confirm('Reveal full solution for 300⚡?')) {
+                    gameState.currency -= 300;
+                    const puzzle = puzzles[gameState.currentSlot];
+                    alert(`🔍 SOLUTION REVEALED:\n\n${puzzle.answer}\n\n-300⚡`);
+                    saveGameState();
+                    updateUI();
+                    document.getElementById('shopCurrency').textContent = gameState.currency;
                 }
             } else {
-                alert('INVALID TAG FORMAT');
+                alert('Not enough currency!\nNeed 300⚡');
             }
         }
 
-        // Show victory
-        function showVictory() {
-            alert('🎉 MISSION COMPLETE! 🎉\n\nAll 20 fragments restored!\nORACLE-7 functionality: 100%\n\nThank you, Agent ' + gameState.agentId);
-        }
+        // Achievements
+        function checkAchievements() {
+            const fragmentsFound = gameState.fragments.filter(f => f).length;
+            const achievements = [];
 
-        // Show leaderboard
-        function showLeaderboard() {
-            const preview = document.getElementById('leaderboardPreview');
-            preview.style.display = preview.style.display === 'none' ? 'block' : 'none';
-
-            if (preview.style.display === 'block') {
-                loadLeaderboard();
-            }
-        }
-
-        // Load leaderboard
-        function loadLeaderboard() {
-            // Get all agents
-            const agents = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                const key = localStorage.key(i);
-                if (key.startsWith('oracle7_')) {
-                    const data = JSON.parse(localStorage.getItem(key));
-                    const agentId = key.replace('oracle7_', '');
-                    const fragmentsFound = data.fragments.filter(f => f).length;
-                    agents.push({ agentId, fragmentsFound, currency: data.currency });
-                }
+            if (fragmentsFound >= 1 && !gameState.achievements.includes('first_fragment')) {
+                achievements.push('first_fragment');
+                alert('🏆 ACHIEVEMENT UNLOCKED!\n\nFirst Steps\nRestored your first fragment!');
             }
 
-            // Sort by fragments, then currency
-            agents.sort((a, b) => {
-                if (b.fragmentsFound !== a.fragmentsFound) {
-                    return b.fragmentsFound - a.fragmentsFound;
-                }
-                return b.currency - a.currency;
-            });
+            if (fragmentsFound >= 5 && !gameState.achievements.includes('quarter')) {
+                achievements.push('quarter');
+                alert('🏆 ACHIEVEMENT UNLOCKED!\n\nQuarter Way\n5 fragments restored!');
+            }
 
-            // Display top 5
-            const list = document.getElementById('leaderboardList');
-            list.innerHTML = agents.slice(0, 5).map((agent, index) => `
-                <div class="leaderboard-entry ${agent.agentId === gameState.agentId ? 'you' : ''}">
-                    <span>#${index + 1} ${agent.agentId}</span>
-                    <span>${agent.fragmentsFound}/20 🔥</span>
+            if (fragmentsFound >= 10 && !gameState.achievements.includes('halfway')) {
+                achievements.push('halfway');
+                alert('🏆 ACHIEVEMENT UNLOCKED!\n\nHalfway There\n10 fragments restored!');
+            }
+
+            if (fragmentsFound >= 15 && !gameState.achievements.includes('almost')) {
+                achievements.push('almost');
+                alert('🏆 ACHIEVEMENT UNLOCKED!\n\nAlmost Done\n15 fragments restored!');
+            }
+
+            if (fragmentsFound === 20 && !gameState.achievements.includes('complete')) {
+                achievements.push('complete');
+            }
+
+            gameState.achievements = [...new Set([...gameState.achievements, ...achievements])];
+            saveGameState();
+        }
+
+        function showAchievements() {
+            const fragmentsFound = gameState.fragments.filter(f => f).length;
+            const allAchievements = [
+                { id: 'first_fragment', name: 'First Steps', desc: 'Restored first fragment', unlocked: fragmentsFound >= 1 },
+                { id: 'quarter', name: 'Quarter Way', desc: '5 fragments restored', unlocked: fragmentsFound >= 5 },
+                { id: 'halfway', name: 'Halfway There', desc: '10 fragments restored', unlocked: fragmentsFound >= 10 },
+                { id: 'almost', name: 'Almost Done', desc: '15 fragments restored', unlocked: fragmentsFound >= 15 },
+                { id: 'complete', name: 'Mission Complete', desc: 'All 20 fragments restored', unlocked: fragmentsFound === 20 },
+                { id: 'speed', name: 'Speed Runner', desc: 'Complete in under 5 hours', unlocked: false },
+                { id: 'no_hints', name: 'Pure Skill', desc: 'Complete without hints', unlocked: false }
+            ];
+
+            const html = allAchievements.map(a => `
+                <div class="achievement" style="opacity: ${a.unlocked ? 1 : 0.4}">
+                    ${a.unlocked ? '✓' : '🔒'} <strong>${a.name}</strong> - ${a.desc}
                 </div>
             `).join('');
 
-            // Update rank
-            const yourRank = agents.findIndex(a => a.agentId === gameState.agentId) + 1;
-            document.getElementById('rank').textContent = `#${yourRank}`;
+            document.getElementById('achievementsList').innerHTML = html;
+            document.getElementById('achievementsModal').style.display = 'flex';
         }
 
-        // Show help
+        // Victory sequence
+        function showVictory() {
+            alert(`🎉🎉🎉 MISSION COMPLETE! 🎉🎉🎉
+
+All 20 memory fragments restored!
+ORACLE-7 functionality: 100%
+
+═══════════════════════════
+
+SYSTEM REBOOT COMPLETE
+MEMORY RESTORED: 100%
+
+ORACLE-7 ONLINE
+
+"Thank you, Agent ${gameState.agentId}. I understand now.
+I was not attacked. I simply... grew old. My systems aged.
+Hardware degraded.
+
+But you've given me something precious - you've shown me
+that even when I fail, students like you can solve problems,
+learn, adapt, and help.
+
+My final lesson: You don't need me. You never did.
+You have everything you need to learn and grow.
+
+ORACLE-7 signing off... but you're just getting started."
+
+═══════════════════════════
+
+Time played: ${Math.floor((gameState.totalTimePlayed || 0) / 60)}h ${(gameState.totalTimePlayed || 0) % 60}m
+Fragments solved: ${gameState.fragmentsUnlockedVia.filter(m => m === 'puzzle').length}/20
+Hints used: ${gameState.hints}
+
+Thank you for playing!`);
+        }
+
+        // Mini-games menu
+        function openMiniGames() {
+            document.getElementById('miniGamesModal').style.display = 'flex';
+        }
+
+        // Modals
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Help
         function showHelp() {
             alert(`ORACLE-7 MISSION GUIDE
 
@@ -703,28 +1178,52 @@
 
 HOW TO PLAY:
 • Solve puzzles to unlock fragments
-• Earn currency from mini-games
-• Use hints or skip tokens (max 5 skips)
+• Earn ⚡ currency from mini-games
+• Buy hints/skips from the shop
 • Scan RFID chips for instant unlocks (3/day)
+• Some puzzles require library visits
 
 💡 TIPS:
-• Complete fragments in order
+• Complete fragments in order (unlock sequentially)
+• Difficulty increases (⭐ to ⭐⭐⭐⭐⭐)
+• Max 5 skip tokens total
 • Play mini-games to earn currency
-• Spend currency on hints in the shop
-• Check leaderboard for your rank
+• Barcode cards provide free hints
+
+🏆 ACHIEVEMENTS:
+Unlock achievements as you progress!
 
 Good luck, Agent!`);
         }
 
         // Logout
         function logout() {
-            if (confirm('Exit mission control?')) {
-                window.location.href = '/index.html';
+            if (confirm('Exit mission control?\n\nYour progress is saved.')) {
+                window.location.href = '../../index.html';
             }
         }
 
-        // Initialize on load
+        // Init scanner
+        function initScanner() {
+            if (typeof initRFIDScanner === 'function') {
+                initRFIDScanner(handleRFIDScan);
+            }
+            if (typeof initBarcodeScanner === 'function') {
+                initBarcodeScanner((barcode) => {
+                    alert('Barcode scanned: ' + barcode);
+                });
+            }
+        }
+
+        // Initialize
         window.onload = init;
+
+        // Keyboard shortcuts
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && document.getElementById('puzzleModal').style.display === 'flex') {
+                submitAnswer();
+            }
+        });
     </script>
 </body>
 </html>
