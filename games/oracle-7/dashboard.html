@@ -391,6 +391,7 @@
                 <button class="btn" onclick="openMiniGames()">⚡ MINI-GAMES</button>
                 <button class="btn btn-secondary" onclick="showAchievements()">🏆 ACHIEVEMENTS</button>
                 <button class="btn btn-secondary" onclick="showHelp()">❓ HELP</button>
+                <button class="btn btn-secondary" onclick="resetProgress()" style="background: rgba(255, 0, 0, 0.2); border-color: #ff0000; color: #ff0000;">🔄 RESET</button>
                 <button class="btn btn-secondary" onclick="logout()">🚪 EXIT</button>
             </div>
         </div>
@@ -889,6 +890,9 @@
             } else if (puzzle.type === 'library' && gameState.currentSlot === 10) {
                 // Fragment 11: Accept 1879 or "1879"
                 isCorrect = userAnswer === '1879';
+            } else if (puzzle.type === 'debug' && gameState.currentSlot === 9) {
+                // Fragment 10: Accept both "COLON" and ":"
+                isCorrect = userAnswer === 'COLON' || userAnswer === ':';
             } else {
                 isCorrect = userAnswer === correctAnswer;
             }
@@ -1222,6 +1226,32 @@ Good luck, Agent!`);
         function logout() {
             if (confirm('Exit mission control?\n\nYour progress is saved.')) {
                 window.location.href = '../../index.html';
+            }
+        }
+
+        // Reset progress (for testing)
+        function resetProgress() {
+            if (confirm('⚠️ RESET ALL PROGRESS?\n\nThis will:\n- Clear all 20 fragments\n- Reset currency to 0\n- Reset hints/skips to 0\n- Keep your Agent ID\n\nThis cannot be undone!')) {
+                if (confirm('Are you REALLY sure?\n\nAll progress will be lost!')) {
+                    // Reset game state
+                    gameState.fragments = Array(20).fill(false);
+                    gameState.fragmentsUnlockedVia = Array(20).fill(null);
+                    gameState.hints = 0;
+                    gameState.skips = 0;
+                    gameState.currency = 0;
+                    gameState.rfidScansToday = 0;
+                    gameState.rfidLimit = 3;
+                    gameState.totalTimePlayed = 0;
+                    gameState.achievements = [];
+                    gameState.miniGamesPlayed = 0;
+
+                    saveGameState();
+
+                    alert('✓ PROGRESS RESET!\n\nAll fragments cleared.\nStarting fresh...');
+
+                    // Reload page
+                    location.reload();
+                }
             }
         }
 
