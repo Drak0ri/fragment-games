@@ -889,6 +889,9 @@
             } else if (puzzle.type === 'library' && gameState.currentSlot === 10) {
                 // Fragment 11: Accept 1879 or "1879"
                 isCorrect = userAnswer === '1879';
+            } else if (puzzle.type === 'debug' && gameState.currentSlot === 9) {
+                // Fragment 10: Accept both "COLON" and ":"
+                isCorrect = userAnswer === 'COLON' || userAnswer === ':';
             } else {
                 isCorrect = userAnswer === correctAnswer;
             }
