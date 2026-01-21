@@ -811,7 +811,14 @@
         // Render slots
         function renderSlots() {
             const grid = document.getElementById('slotsGrid');
-            grid.innerHTML = '';
+
+            // Clear all existing slots
+            while (grid.firstChild) {
+                grid.removeChild(grid.firstChild);
+            }
+
+            // Force a style recalculation
+            void grid.offsetWidth;
 
             for (let i = 0; i < 20; i++) {
                 const slot = document.createElement('div');
@@ -846,6 +853,8 @@
 
                 grid.appendChild(slot);
             }
+
+            console.log('Slots rendered. Unlocked slots:', gameState.fragments.map((f, i) => i === 0 || gameState.fragments[i - 1] ? i + 1 : null).filter(x => x));
         }
 
         // Open puzzle
@@ -902,21 +911,29 @@
 
             const puzzle = puzzles[slotIndex];
 
-            // Close modal and update UI FIRST
+            // Close modal FIRST
             closeModal('puzzleModal');
+
+            // Save and update UI
             saveGameState();
-            renderSlots();
-            updateUI();
 
-            // Show alert AFTER UI updates (non-blocking)
-            setTimeout(() => {
-                alert(`✓ FRAGMENT RESTORED!\n\n"${puzzle.memory}"\n\n${method === 'puzzle' ? '+10 ⚡ Currency' : ''}`);
-            }, 100);
+            // Use requestAnimationFrame to ensure browser repaints before alert
+            requestAnimationFrame(() => {
+                renderSlots();
+                updateUI();
 
-            // Check victory
-            if (gameState.fragments.every(f => f)) {
-                setTimeout(showVictory, 1000);
-            }
+                // Wait for next frame to show alert (ensures repaint completes)
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        alert(`✓ FRAGMENT RESTORED!\n\n"${puzzle.memory}"\n\n${method === 'puzzle' ? '+10 ⚡ Currency' : ''}`);
+
+                        // Check victory after alert
+                        if (gameState.fragments.every(f => f)) {
+                            setTimeout(showVictory, 500);
+                        }
+                    }, 50);
+                });
+            });
         }
 
         // Use hint
