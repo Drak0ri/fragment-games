@@ -571,11 +571,11 @@
                 id: 4,
                 title: "THE LIBRARY",
                 difficulty: 2,
-                question: '<strong>⚠️ LIBRARY INTEGRATION REQUIRED</strong><br><br>Memory fragment located in LIBRARY database.<br>Find book: <strong>Dewey Decimal 004.6 (Computer Networks)</strong><br>Look at page 42.<br><br>Enter the highlighted word from the page:',
+                question: 'ORACLE-7 recalls library data...<br><br>Complete the word: <span style="font-size: 1.5em;">C O N _ _ C T I O N</span><br><br>What connects computers together?',
                 answer: "CONNECTION",
-                hint: "Go to the library and find the book. The answer is highlighted on page 42.",
+                hint: "It's how computers link to each other in a network",
                 memory: "The library... endless knowledge... I would help students find answers there...",
-                type: "library"
+                type: "word"
             },
             {
                 id: 5,
@@ -641,11 +641,11 @@
                 id: 11,
                 title: "HISTORICAL DATA",
                 difficulty: 4,
-                question: '<strong>⚠️ LIBRARY RESEARCH REQUIRED</strong><br><br>Find any biography book about a scientist.<br>Scan the barcode.<br><br>What year was Albert Einstein born?',
+                question: 'ORACLE-7 remembers famous scientists...<br><br>Einstein developed the theory of relativity.<br>He was born in Germany in the year:<br><br><span style="font-size: 1.3em;">18__</span><br><br>What year was Einstein born?',
                 answer: "1879",
-                hint: "Research Albert Einstein's birth year (you can use the library or your knowledge)",
+                hint: "He was born in the late 1800s. Think: 187_",
                 memory: "Great minds... I learned from them all... Einstein, Curie, Turing... giants...",
-                type: "library"
+                type: "trivia"
             },
             {
                 id: 12,
@@ -711,9 +711,9 @@
                 id: 18,
                 title: "THE WARNING",
                 difficulty: 5,
-                question: '<strong>⚠️ LIBRARY + CIPHER REQUIRED</strong><br><br>Decrypt using ROT13:<br><br><span style="font-size: 1.5em;">JNEAVAT</span>',
+                question: 'ORACLE-7 sent an urgent message...<br><br>Decrypt using ROT13 cipher:<br><br><span style="font-size: 1.5em;">JNEAVAT</span><br><br>(Shift each letter 13 positions in the alphabet)',
                 answer: "WARNING",
-                hint: "ROT13: Each letter shifts 13 positions. W→J, A→N, etc.",
+                hint: "ROT13: Each letter shifts 13 positions. W→J, A→N, etc. Or shift backwards!",
                 memory: "I tried to warn them... something was wrong... the corruption spreading... WARNING...",
                 type: "cipher"
             },
@@ -891,13 +891,7 @@
             let correctAnswer = puzzle.answer.toUpperCase();
             let isCorrect = false;
 
-            if (puzzle.type === 'library' && gameState.currentSlot === 3) {
-                // Fragment 4: Accept "CONNECTION" or any reasonable library word
-                isCorrect = userAnswer === 'CONNECTION';
-            } else if (puzzle.type === 'library' && gameState.currentSlot === 10) {
-                // Fragment 11: Accept 1879 or "1879"
-                isCorrect = userAnswer === '1879';
-            } else if (puzzle.type === 'debug' && gameState.currentSlot === 9) {
+            if (puzzle.type === 'debug' && gameState.currentSlot === 9) {
                 // Fragment 10: Accept both "COLON" and ":"
                 isCorrect = userAnswer === 'COLON' || userAnswer === ':';
             } else {
