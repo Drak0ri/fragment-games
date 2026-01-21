@@ -901,16 +901,21 @@
             }
 
             const puzzle = puzzles[slotIndex];
-            alert(`✓ FRAGMENT RESTORED!\n\n"${puzzle.memory}"\n\n${method === 'puzzle' ? '+10 ⚡ Currency' : ''}`);
 
+            // Close modal and update UI FIRST
+            closeModal('puzzleModal');
             saveGameState();
             renderSlots();
             updateUI();
-            closeModal('puzzleModal');
+
+            // Show alert AFTER UI updates (non-blocking)
+            setTimeout(() => {
+                alert(`✓ FRAGMENT RESTORED!\n\n"${puzzle.memory}"\n\n${method === 'puzzle' ? '+10 ⚡ Currency' : ''}`);
+            }, 100);
 
             // Check victory
             if (gameState.fragments.every(f => f)) {
-                setTimeout(showVictory, 500);
+                setTimeout(showVictory, 1000);
             }
         }
 
