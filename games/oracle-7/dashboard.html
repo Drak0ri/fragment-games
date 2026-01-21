@@ -848,14 +848,21 @@
 
                 if (isUnlocked && !isCompleted) {
                     slot.onclick = () => openPuzzle(i);
+                    slot.style.cursor = 'pointer';
+                    console.log(`Slot ${i + 1}: UNLOCKED & CLICKABLE`);
                 } else if (isCompleted) {
                     slot.onclick = () => showMemory(i);
+                    console.log(`Slot ${i + 1}: COMPLETED`);
+                } else {
+                    slot.onclick = null;
+                    console.log(`Slot ${i + 1}: LOCKED`);
                 }
 
                 grid.appendChild(slot);
             }
 
-            console.log('Slots rendered. Unlocked slots:', gameState.fragments.map((f, i) => i === 0 || gameState.fragments[i - 1] ? i + 1 : null).filter(x => x));
+            console.log('=== RENDER COMPLETE ===');
+            console.log('Total unlocked slots:', gameState.fragments.map((f, i) => i === 0 || gameState.fragments[i - 1] ? i + 1 : null).filter(x => x));
         }
 
         // Open puzzle
@@ -915,29 +922,32 @@
 
             const puzzle = puzzles[slotIndex];
 
-            // Close modal FIRST
+            // Close modal immediately
             closeModal('puzzleModal');
 
-            // Save and update UI
+            // Save game state
             saveGameState();
 
-            // Use requestAnimationFrame to ensure browser repaints before alert
-            requestAnimationFrame(() => {
-                renderSlots();
-                updateUI();
+            // Render slots and update UI SYNCHRONOUSLY
+            renderSlots();
+            updateUI();
 
-                // Wait for next frame to show alert (ensures repaint completes)
-                requestAnimationFrame(() => {
-                    setTimeout(() => {
-                        alert(`✓ FRAGMENT RESTORED!\n\n"${puzzle.memory}"\n\n${method === 'puzzle' ? '+10 ⚡ Currency' : ''}`);
+            console.log('Fragment completed:', slotIndex + 1);
+            console.log('Next slot should be unlocked:', slotIndex + 2);
+            console.log('Game state fragments:', gameState.fragments);
 
-                        // Check victory after alert
-                        if (gameState.fragments.every(f => f)) {
-                            setTimeout(showVictory, 500);
-                        }
-                    }, 50);
-                });
-            });
+            // Force browser repaint by reading layout property
+            document.body.offsetHeight;
+
+            // Show alert AFTER a brief delay to ensure UI has updated
+            setTimeout(() => {
+                alert(`✓ FRAGMENT RESTORED!\n\n"${puzzle.memory}"\n\n${method === 'puzzle' ? '+10 ⚡ Currency' : ''}`);
+
+                // Check victory after alert
+                if (gameState.fragments.every(f => f)) {
+                    setTimeout(showVictory, 500);
+                }
+            }, 200);
         }
 
         // Use hint
