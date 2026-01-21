@@ -790,7 +790,7 @@
             delete toSave.sessionStart; // Don't save session start
             toSave.lastActive = new Date().toISOString();
             localStorage.setItem(`oracle7_${gameState.agentId}`, JSON.stringify(toSave));
-            checkAchievements();
+            // Note: Don't call checkAchievements here to avoid infinite loop
         }
 
         // Time tracking
@@ -925,7 +925,8 @@
             // Close modal immediately
             closeModal('puzzleModal');
 
-            // Save game state
+            // Check achievements and save state (in correct order)
+            checkAchievements();
             saveGameState();
 
             // Render slots and update UI SYNCHRONOUSLY
@@ -1135,7 +1136,7 @@
             }
 
             gameState.achievements = [...new Set([...gameState.achievements, ...achievements])];
-            saveGameState();
+            // Don't save here - caller should save after checking achievements
         }
 
         function showAchievements() {
