@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fragment Games - Loading...</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0a0a;
+            color: #00ff00;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* Template-specific styling */
+        body.theme-ai {
+            background: #0a0a0a;
+            color: #00ff00;
+        }
+
+        body.theme-virus {
+            background: linear-gradient(135deg, #1a0a0a 0%, #2a0a1a 100%);
+            color: #ff6699;
+        }
+
+        body.theme-history {
+            background: linear-gradient(135deg, #2a1a0a 0%, #3a2a1a 100%);
+            color: #ffcc66;
+        }
+
+        body.theme-scifi {
+            background: linear-gradient(135deg, #0a1a2a 0%, #1a2a3a 100%);
+            color: #66ccff;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 2px solid currentColor;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            text-shadow: 0 0 10px currentColor;
+            margin-bottom: 10px;
+        }
+
+        .game-meta {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .agent-info {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0, 50, 0, 0.3);
+            border: 1px solid currentColor;
+            padding: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        body.theme-virus .agent-info {
+            background: rgba(50, 0, 25, 0.3);
+        }
+
+        body.theme-history .agent-info {
+            background: rgba(50, 25, 0, 0.3);
+        }
+
+        body.theme-scifi .agent-info {
+            background: rgba(0, 25, 50, 0.3);
+        }
+
+        .info-item {
+            padding: 10px 20px;
+        }
+
+        .info-label {
+            font-size: 0.8em;
+            opacity: 0.7;
+        }
+
+        .info-value {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #1a1a1a;
+            border: 2px solid currentColor;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, currentColor);
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .memory-slot {
+            aspect-ratio: 1;
+            border: 2px solid currentColor;
+            background: rgba(0, 20, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        body.theme-virus .memory-slot {
+            background: rgba(20, 0, 10, 0.5);
+        }
+
+        body.theme-history .memory-slot {
+            background: rgba(20, 10, 0, 0.5);
+        }
+
+        body.theme-scifi .memory-slot {
+            background: rgba(0, 10, 20, 0.5);
+        }
+
+        .memory-slot:hover {
+            background: rgba(0, 50, 0, 0.8);
+            box-shadow: 0 0 20px currentColor;
+            transform: scale(1.05);
+        }
+
+        .memory-slot.locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .memory-slot.unlocked {
+            background: rgba(0, 100, 0, 0.5);
+            border-color: currentColor;
+            animation: pulse 2s infinite;
+            cursor: pointer;
+        }
+
+        .memory-slot.completed {
+            background: rgba(0, 255, 0, 0.2);
+            border-color: currentColor;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 10px currentColor; }
+            50% { box-shadow: 0 0 25px currentColor; }
+        }
+
+        .slot-number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .slot-difficulty {
+            font-size: 0.7em;
+            margin-top: 5px;
+            color: #ffff00;
+        }
+
+        .slot-status {
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+
+        .slot-icon {
+            font-size: 1.5em;
+            margin-top: 5px;
+        }
+
+        .sidebar {
+            border: 2px solid currentColor;
+            background: rgba(0, 20, 0, 0.8);
+            padding: 20px;
+            height: fit-content;
+        }
+
+        body.theme-virus .sidebar {
+            background: rgba(20, 0, 10, 0.8);
+        }
+
+        body.theme-history .sidebar {
+            background: rgba(20, 10, 0, 0.8);
+        }
+
+        body.theme-scifi .sidebar {
+            background: rgba(0, 10, 20, 0.8);
+        }
+
+        .sidebar h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 1px solid currentColor;
+            padding-bottom: 10px;
+        }
+
+        .inventory-section {
+            margin-bottom: 30px;
+        }
+
+        .inventory-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            margin: 10px 0;
+            background: rgba(0, 50, 0, 0.3);
+            border: 1px solid currentColor;
+        }
+
+        .item-count {
+            font-weight: bold;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px;
+            background: currentColor;
+            color: #000;
+            border: none;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+            box-shadow: 0 0 15px currentColor;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: currentColor;
+            border: 2px solid currentColor;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: #0a0a0a;
+            border: 2px solid currentColor;
+            padding: 40px;
+            max-width: 700px;
+            width: 90%;
+            box-shadow: 0 0 50px currentColor;
+            margin: 20px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .puzzle-content {
+            margin: 20px 0;
+            line-height: 1.8;
+        }
+
+        .close-btn {
+            float: right;
+            cursor: pointer;
+            font-size: 1.5em;
+            color: #ff0000;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            border: 2px solid currentColor;
+            color: currentColor;
+            font-family: 'Courier New', monospace;
+            font-size: 1em;
+            margin: 20px 0;
+        }
+
+        .success-message {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #00ff00;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .error-message {
+            background: rgba(255, 0, 0, 0.1);
+            border: 2px solid #ff0000;
+            color: #ff6666;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+            .slots-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .slots-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 id="gameTitle">Loading Game...</h1>
+        <div class="game-meta" id="gameMeta"></div>
+    </div>
+
+    <div class="agent-info">
+        <div class="info-item">
+            <div class="info-label">AGENT ID</div>
+            <div class="info-value" id="agentId">AGENT-???</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">QUESTIONS SOLVED</div>
+            <div class="info-value" id="questionsSolved">0/20</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">CURRENCY</div>
+            <div class="info-value" id="currency">0 ⚡</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">TIME PLAYED</div>
+            <div class="info-value" id="timePlayed">0h 0m</div>
+        </div>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressBar">0% COMPLETE</div>
+    </div>
+
+    <div class="main-container">
+        <div class="slots-container">
+            <h2 style="margin-bottom: 20px; text-align: center;" id="slotsTitle">QUESTIONS</h2>
+            <div class="slots-grid" id="slotsGrid"></div>
+        </div>
+
+        <div class="sidebar">
+            <h2>📦 INVENTORY</h2>
+
+            <div class="inventory-section">
+                <div class="inventory-item">
+                    <span>💡 Hints</span>
+                    <span class="item-count" id="hintsCount">0</span>
+                </div>
+                <div class="inventory-item">
+                    <span>⏭️ Skip Tokens</span>
+                    <span class="item-count" id="skipsCount">0/3</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn" onclick="openMiniGames()">⚡ EARN CURRENCY</button>
+                <button class="btn btn-secondary" onclick="showHelp()">❓ HELP</button>
+                <button class="btn btn-secondary" onclick="goBack()">🏠 GAME MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Puzzle Modal -->
+    <div class="modal" id="puzzleModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">QUESTION #1</h2>
+            <div class="puzzle-content" id="puzzleContent"></div>
+            <div style="margin-top: 20px;">
+                <input type="text" id="puzzleAnswer" placeholder="Enter your answer...">
+                <button class="btn" onclick="submitAnswer()" style="width: 100%;">SUBMIT ANSWER</button>
+                <button class="btn btn-secondary" onclick="useHint()" style="width: 100%; margin-top: 10px;">USE HINT (💡 20⚡)</button>
+                <button class="btn btn-secondary" onclick="skipQuestion()" style="width: 100%; margin-top: 10px;">USE SKIP TOKEN (⏭️ 1 token)</button>
+            </div>
+            <div id="feedbackMessage"></div>
+        </div>
+    </div>
+
+    <script src="../shared/js/auth.js"></script>
+    <script>
+        let gameData = null;
+        let gameState = {
+            agentId: '',
+            email: '',
+            questions: Array(20).fill(false),
+            currency: 0,
+            hints: 0,
+            skips: 3,
+            currentQuestion: null,
+            sessionStart: Date.now(),
+            totalTimePlayed: 0
+        };
+
+        // Initialize
+        function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get('id');
+
+            if (!gameId) {
+                alert('No game specified');
+                window.location.href = '../index.html';
+                return;
+            }
+
+            loadGame(gameId);
+            loadGameState(gameId);
+            applyTheme();
+            renderQuestions();
+            updateUI();
+            startTimeTracking();
+        }
+
+        // Load game data
+        function loadGame(gameId) {
+            const gameJson = localStorage.getItem(`game_${gameId}`);
+
+            if (!gameJson) {
+                alert('Game not found');
+                window.location.href = '../index.html';
+                return;
+            }
+
+            gameData = JSON.parse(gameJson);
+
+            // Update page title and header
+            document.title = gameData.title + ' - Fragment Games';
+            document.getElementById('gameTitle').textContent = gameData.title;
+            document.getElementById('gameMeta').textContent = `${gameData.subject} | Created by ${gameData.teacher}`;
+
+            // Increment play count
+            gameData.plays = (gameData.plays || 0) + 1;
+            localStorage.setItem(`game_${gameId}`, JSON.stringify(gameData));
+        }
+
+        // Load game state
+        function loadGameState(gameId) {
+            const agent = getAgent();
+            if (!agent) {
+                // Redirect to main index to register
+                if (confirm('You need to register first. Go to main menu?')) {
+                    window.location.href = '../index.html';
+                }
+                return;
+            }
+
+            gameState.agentId = agent.id;
+            gameState.email = agent.email;
+
+            const savedStateKey = `gamestate_${gameId}_${agent.id}`;
+            const saved = localStorage.getItem(savedStateKey);
+
+            if (saved) {
+                const savedData = JSON.parse(saved);
+                gameState = { ...gameState, ...savedData, sessionStart: Date.now() };
+            }
+        }
+
+        // Save game state
+        function saveGameState() {
+            if (!gameData) return;
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get('id');
+
+            const toSave = { ...gameState };
+            delete toSave.sessionStart;
+            toSave.lastActive = new Date().toISOString();
+
+            localStorage.setItem(`gamestate_${gameId}_${gameState.agentId}`, JSON.stringify(toSave));
+        }
+
+        // Apply theme
+        function applyTheme() {
+            if (!gameData) return;
+            document.body.className = `theme-${gameData.template}`;
+        }
+
+        // Time tracking
+        function startTimeTracking() {
+            setInterval(() => {
+                gameState.totalTimePlayed = (gameState.totalTimePlayed || 0) + 1;
+                updateTimeDisplay();
+            }, 60000);
+        }
+
+        function updateTimeDisplay() {
+            const totalMinutes = gameState.totalTimePlayed || 0;
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            document.getElementById('timePlayed').textContent = `${hours}h ${minutes}m`;
+        }
+
+        // Render questions
+        function renderQuestions() {
+            if (!gameData) return;
+
+            const grid = document.getElementById('slotsGrid');
+            grid.innerHTML = '';
+
+            for (let i = 0; i < 20; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'memory-slot';
+                const question = gameData.questions[i];
+
+                const isCompleted = gameState.questions[i];
+                const isUnlocked = i === 0 || gameState.questions[i - 1];
+
+                if (isCompleted) {
+                    slot.classList.add('completed');
+                } else if (isUnlocked) {
+                    slot.classList.add('unlocked');
+                } else {
+                    slot.classList.add('locked');
+                }
+
+                const stars = '⭐'.repeat(question.difficulty);
+
+                slot.innerHTML = `
+                    <div class="slot-number">${String(i + 1).padStart(2, '0')}</div>
+                    <div class="slot-difficulty">${stars}</div>
+                    <div class="slot-status">${isCompleted ? 'SOLVED' : isUnlocked ? 'READY' : 'LOCKED'}</div>
+                    <div class="slot-icon">${isCompleted ? '✓' : isUnlocked ? '🔓' : '🔒'}</div>
+                `;
+
+                if (isUnlocked && !isCompleted) {
+                    slot.onclick = () => openQuestion(i);
+                } else if (isCompleted) {
+                    slot.onclick = () => showCompleted(i);
+                }
+
+                grid.appendChild(slot);
+            }
+        }
+
+        // Open question
+        function openQuestion(index) {
+            gameState.currentQuestion = index;
+            const question = gameData.questions[index];
+
+            document.getElementById('modalTitle').textContent = `QUESTION #${question.id}`;
+            document.getElementById('puzzleContent').innerHTML = `
+                <div style="font-size: 1.2em; line-height: 1.8;">
+                    ${question.question}
+                </div>
+            `;
+            document.getElementById('puzzleAnswer').value = '';
+            document.getElementById('feedbackMessage').innerHTML = '';
+            document.getElementById('puzzleModal').style.display = 'flex';
+        }
+
+        // Show completed
+        function showCompleted(index) {
+            const question = gameData.questions[index];
+            alert(`✓ QUESTION #${question.id} - SOLVED\n\n"${question.question}"\n\nAnswer: ${question.answer}`);
+        }
+
+        // Submit answer
+        function submitAnswer() {
+            const userAnswer = document.getElementById('puzzleAnswer').value.trim().toUpperCase();
+            const question = gameData.questions[gameState.currentQuestion];
+            const correctAnswer = question.answer.toUpperCase();
+
+            const feedback = document.getElementById('feedbackMessage');
+
+            if (userAnswer === correctAnswer) {
+                gameState.questions[gameState.currentQuestion] = true;
+                gameState.currency += 10;
+
+                feedback.innerHTML = `
+                    <div class="success-message">
+                        <strong>✓ CORRECT!</strong><br><br>
+                        +10⚡ Currency earned!
+                    </div>
+                `;
+
+                saveGameState();
+
+                setTimeout(() => {
+                    closeModal();
+                    renderQuestions();
+                    updateUI();
+
+                    // Check victory
+                    if (gameState.questions.every(q => q)) {
+                        setTimeout(showVictory, 500);
+                    }
+                }, 2000);
+            } else {
+                feedback.innerHTML = `
+                    <div class="error-message">
+                        ❌ Incorrect. Try again!
+                    </div>
+                `;
+            }
+        }
+
+        // Use hint
+        function useHint() {
+            const question = gameData.questions[gameState.currentQuestion];
+
+            if (!question.hint) {
+                alert('No hint available for this question');
+                return;
+            }
+
+            if (gameState.currency >= 20) {
+                gameState.currency -= 20;
+                alert(`💡 HINT:\n\n${question.hint}\n\n-20⚡`);
+                saveGameState();
+                updateUI();
+            } else {
+                alert('Not enough currency!\nNeed 20⚡ for a hint.\n\nPlay mini-games to earn more!');
+            }
+        }
+
+        // Skip question
+        function skipQuestion() {
+            if (gameState.skips > 0) {
+                if (confirm('Use a SKIP TOKEN?\n\nThis will mark the question as solved without answering.')) {
+                    gameState.skips--;
+                    gameState.questions[gameState.currentQuestion] = true;
+
+                    alert('Question skipped!');
+
+                    saveGameState();
+                    closeModal();
+                    renderQuestions();
+                    updateUI();
+
+                    if (gameState.questions.every(q => q)) {
+                        setTimeout(showVictory, 500);
+                    }
+                }
+            } else {
+                alert('No skip tokens available!\n\nYou start with 3 skip tokens per game.');
+            }
+        }
+
+        // Update UI
+        function updateUI() {
+            const questionsSolved = gameState.questions.filter(q => q).length;
+            const progressPercent = Math.round((questionsSolved / 20) * 100);
+
+            document.getElementById('agentId').textContent = gameState.agentId;
+            document.getElementById('questionsSolved').textContent = `${questionsSolved}/20`;
+            document.getElementById('currency').textContent = `${gameState.currency} ⚡`;
+            document.getElementById('hintsCount').textContent = Math.floor(gameState.currency / 20);
+            document.getElementById('skipsCount').textContent = `${gameState.skips}/3`;
+
+            updateTimeDisplay();
+
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = `${progressPercent}%`;
+            progressBar.textContent = `${progressPercent}% COMPLETE`;
+        }
+
+        // Victory
+        function showVictory() {
+            alert(`🎉🎉🎉 GAME COMPLETE! 🎉🎉🎉\n\nCongratulations!\n\nYou've completed "${gameData.title}"\nby ${gameData.teacher}\n\nAll 20 questions solved!\n\nTime played: ${Math.floor((gameState.totalTimePlayed || 0) / 60)}h ${(gameState.totalTimePlayed || 0) % 60}m\n\nThank you for playing!`);
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('puzzleModal').style.display = 'none';
+        }
+
+        // Mini-games
+        function openMiniGames() {
+            if (confirm('Open mini-games to earn currency?\n\nYou can use currency to buy hints.')) {
+                // Save current state
+                saveGameState();
+                window.location.href = '../mini-games/typing.html';
+            }
+        }
+
+        // Help
+        function showHelp() {
+            alert(`GAME GUIDE\n\n🎯 OBJECTIVE: Answer all 20 questions\n\nHOW TO PLAY:\n• Click unlocked questions to answer\n• Questions unlock in order (1→2→3...)\n• Earn ⚡ currency from mini-games\n• Use currency for hints (20⚡)\n\n💡 TIPS:\n• Read questions carefully\n• Answers are not case-sensitive\n• Use hints if stuck\n• Skip tokens: max 3 per game\n\nGood luck!`);
+        }
+
+        // Go back
+        function goBack() {
+            if (confirm('Return to game menu?\n\nYour progress is saved.')) {
+                saveGameState();
+                window.location.href = '../index.html';
+            }
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && document.getElementById('puzzleModal').style.display === 'flex') {
+                submitAnswer();
+            }
+        });
+
+        // Initialize
+        window.onload = init;
+    </script>
+</body>
+</html>

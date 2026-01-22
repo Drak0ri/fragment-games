@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Portal - Fragment Games</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #888;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 15px 30px;
+            background: transparent;
+            border: none;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            color: #888;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .template-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .template-card {
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .template-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+        }
+
+        .template-card.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .template-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .questions-section {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .question-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .question-number {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .question-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-danger {
+            background: #ff4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #cc0000;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        .my-games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .game-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s;
+        }
+
+        .game-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .game-card-title {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .game-card-meta {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+
+        .game-card-stats {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .game-card-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .difficulty-selector {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .difficulty-btn {
+            padding: 8px 15px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .difficulty-btn.selected {
+            background: #FFD93D;
+            border-color: #FFD93D;
+        }
+
+        .help-text {
+            font-size: 0.85em;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        @media (max-width: 768px) {
+            .template-selector {
+                grid-template-columns: 1fr;
+            }
+            .tabs {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>👨‍🏫 Teacher Portal</h1>
+        <div class="subtitle">Create custom games for your students</div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('create')">Create New Game</button>
+            <button class="tab" onclick="switchTab('my-games')">My Games</button>
+            <button class="tab" onclick="switchTab('help')">Help & Guide</button>
+        </div>
+
+        <!-- CREATE GAME TAB -->
+        <div id="tab-create" class="tab-content active">
+            <div class="alert alert-info">
+                <strong>💡 Quick Start:</strong> Fill in the details below to create a custom game for your students. Choose a template, add your questions, and publish!
+            </div>
+
+            <form id="gameForm">
+                <div class="form-group">
+                    <label>Game Title *</label>
+                    <input type="text" id="gameTitle" placeholder="e.g., Algebra Adventure" required>
+                    <div class="help-text">Choose a fun, engaging title for your game</div>
+                </div>
+
+                <div class="form-group">
+                    <label>Your Name *</label>
+                    <input type="text" id="teacherName" placeholder="e.g., Ms. Johnson" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Subject/Category *</label>
+                    <select id="gameSubject" required>
+                        <option value="">Select a subject...</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Science">Science</option>
+                        <option value="History">History</option>
+                        <option value="English">English</option>
+                        <option value="Geography">Geography</option>
+                        <option value="Languages">Languages</option>
+                        <option value="Computing">Computing</option>
+                        <option value="Art">Art</option>
+                        <option value="Music">Music</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Year Level</label>
+                    <select id="yearLevel">
+                        <option value="">Any year</option>
+                        <option value="4">Year 4</option>
+                        <option value="5">Year 5</option>
+                        <option value="6">Year 6</option>
+                        <option value="7">Year 7</option>
+                        <option value="8">Year 8</option>
+                        <option value="9">Year 9</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Choose Game Template *</label>
+                    <div class="template-selector">
+                        <div class="template-card" onclick="selectTemplate('ai')" data-template="ai">
+                            <div class="template-icon">🤖</div>
+                            <div style="font-weight: 700;">AI Mystery</div>
+                            <div style="font-size: 0.8em; color: #888;">Tech/Logic</div>
+                        </div>
+                        <div class="template-card" onclick="selectTemplate('virus')" data-template="virus">
+                            <div class="template-icon">🦠</div>
+                            <div style="font-weight: 700;">Virus Hunt</div>
+                            <div style="font-size: 0.8em; color: #888;">Problem Solving</div>
+                        </div>
+                        <div class="template-card" onclick="selectTemplate('history')" data-template="history">
+                            <div class="template-icon">📜</div>
+                            <div style="font-weight: 700;">Time Capsule</div>
+                            <div style="font-size: 0.8em; color: #888;">Discovery/Research</div>
+                        </div>
+                        <div class="template-card" onclick="selectTemplate('scifi')" data-template="scifi">
+                            <div class="template-icon">🚀</div>
+                            <div style="font-weight: 700;">Space Mission</div>
+                            <div style="font-size: 0.8em; color: #888;">Adventure/Challenge</div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="selectedTemplate" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Game Description (Optional)</label>
+                    <textarea id="gameDescription" rows="3" placeholder="Brief description of what students will learn..."></textarea>
+                </div>
+
+                <div class="questions-section">
+                    <h3 style="margin-bottom: 20px;">Questions (20 Required)</h3>
+                    <div id="questionsContainer">
+                        <!-- Questions will be added here -->
+                    </div>
+                    <button type="button" class="btn btn-secondary" onclick="addQuestion()">+ Add Question</button>
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-top: 30px;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;">Publish Game</button>
+                    <button type="button" class="btn btn-secondary" onclick="saveAsDraft()">Save as Draft</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">Clear Form</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- MY GAMES TAB -->
+        <div id="tab-my-games" class="tab-content">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <h3>Your Published Games</h3>
+                <div>
+                    <button class="btn btn-secondary btn-small" onclick="exportAllGames()">📥 Export All</button>
+                    <button class="btn btn-secondary btn-small" onclick="importGames()">📤 Import</button>
+                    <button class="btn btn-secondary btn-small" onclick="location.href='../index.html'">🏠 Back to Games</button>
+                </div>
+            </div>
+            <div id="myGamesGrid" class="my-games-grid">
+                <!-- Games will be loaded here -->
+            </div>
+        </div>
+
+        <!-- HELP TAB -->
+        <div id="tab-help" class="tab-content">
+            <h2 style="margin-bottom: 20px;">How to Create a Game</h2>
+
+            <div style="background: #f8f9fa; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px;">📝 Step-by-Step Guide</h3>
+                <ol style="line-height: 2; padding-left: 20px;">
+                    <li><strong>Choose a Template:</strong> Select the game style that fits your subject (AI for logic, History for exploration, etc.)</li>
+                    <li><strong>Enter Game Details:</strong> Give your game a catchy title and select the subject</li>
+                    <li><strong>Add 20 Questions:</strong> Each question needs:
+                        <ul style="margin-top: 10px;">
+                            <li>Question text (what students see)</li>
+                            <li>Correct answer (not case-sensitive)</li>
+                            <li>Hint (optional - costs students 20⚡ to use)</li>
+                            <li>Difficulty level (⭐ to ⭐⭐⭐⭐⭐)</li>
+                        </ul>
+                    </li>
+                    <li><strong>Publish:</strong> Students can immediately play your game!</li>
+                </ol>
+            </div>
+
+            <div style="background: #fff3cd; padding: 25px; border-radius: 15px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px;">💡 Tips for Great Questions</h3>
+                <ul style="line-height: 2; padding-left: 20px;">
+                    <li>Start easy (⭐) and gradually increase difficulty</li>
+                    <li>Keep answers short and simple (1-3 words ideal)</li>
+                    <li>Write hints that guide without giving the answer</li>
+                    <li>Test your game before students play it</li>
+                    <li>Use the demo game to see how it works</li>
+                </ul>
+            </div>
+
+            <div style="background: #d1ecf1; padding: 25px; border-radius: 15px;">
+                <h3 style="margin-bottom: 15px;">🎮 Game Mechanics</h3>
+                <p style="line-height: 1.8;">
+                    Students earn <strong>⚡ currency</strong> by playing mini-games. They can spend currency on:
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+                        <li><strong>Hints (20⚡):</strong> Show the hint you wrote</li>
+                        <li><strong>Skip Tokens (200⚡):</strong> Skip a question (max 3 per game)</li>
+                    </ul>
+                </p>
+                <p style="margin-top: 15px; line-height: 1.8;">
+                    Students complete games by answering all 20 questions correctly. They can replay games to improve their time or help classmates.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleImport(event)">
+
+    <script src="../shared/js/auth.js"></script>
+    <script>
+        let currentQuestionCount = 0;
+        let editingGameId = null;
+
+        // Initialize
+        window.onload = function() {
+            loadMyGames();
+            addQuestion(); // Start with one question
+            loadDraftIfExists();
+        };
+
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+
+            if (tabName === 'my-games') {
+                loadMyGames();
+            }
+        }
+
+        // Template selection
+        function selectTemplate(templateId) {
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+            document.getElementById('selectedTemplate').value = templateId;
+        }
+
+        // Add question
+        function addQuestion() {
+            if (currentQuestionCount >= 20) {
+                alert('Maximum 20 questions allowed');
+                return;
+            }
+
+            currentQuestionCount++;
+            const questionId = 'q' + currentQuestionCount;
+
+            const questionHTML = `
+                <div class="question-item" id="question-${questionId}">
+                    <div class="question-header">
+                        <div class="question-number">Question ${currentQuestionCount}</div>
+                        <div class="question-controls">
+                            <button type="button" class="btn btn-danger btn-small" onclick="removeQuestion('${questionId}')">Remove</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Question Text *</label>
+                        <input type="text" class="question-text" data-qid="${questionId}" placeholder="e.g., What is 7 × 8?" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Correct Answer *</label>
+                        <input type="text" class="question-answer" data-qid="${questionId}" placeholder="e.g., 56" required>
+                        <div class="help-text">Not case-sensitive. Keep it simple!</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Hint (Optional)</label>
+                        <input type="text" class="question-hint" data-qid="${questionId}" placeholder="e.g., Multiply 7 by 8">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Difficulty Level</label>
+                        <div class="difficulty-selector">
+                            <button type="button" class="difficulty-btn" data-qid="${questionId}" data-level="1" onclick="setDifficulty(this)">⭐</button>
+                            <button type="button" class="difficulty-btn" data-qid="${questionId}" data-level="2" onclick="setDifficulty(this)">⭐⭐</button>
+                            <button type="button" class="difficulty-btn selected" data-qid="${questionId}" data-level="3" onclick="setDifficulty(this)">⭐⭐⭐</button>
+                            <button type="button" class="difficulty-btn" data-qid="${questionId}" data-level="4" onclick="setDifficulty(this)">⭐⭐⭐⭐</button>
+                            <button type="button" class="difficulty-btn" data-qid="${questionId}" data-level="5" onclick="setDifficulty(this)">⭐⭐⭐⭐⭐</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('questionsContainer').insertAdjacentHTML('beforeend', questionHTML);
+        }
+
+        // Remove question
+        function removeQuestion(questionId) {
+            if (confirm('Remove this question?')) {
+                document.getElementById('question-' + questionId).remove();
+                currentQuestionCount--;
+                renumberQuestions();
+            }
+        }
+
+        // Renumber questions
+        function renumberQuestions() {
+            const questions = document.querySelectorAll('.question-item');
+            questions.forEach((q, index) => {
+                q.querySelector('.question-number').textContent = `Question ${index + 1}`;
+            });
+        }
+
+        // Set difficulty
+        function setDifficulty(button) {
+            const qid = button.dataset.qid;
+            document.querySelectorAll(`[data-qid="${qid}"].difficulty-btn`).forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            button.classList.add('selected');
+        }
+
+        // Collect form data
+        function collectFormData() {
+            const title = document.getElementById('gameTitle').value.trim();
+            const teacher = document.getElementById('teacherName').value.trim();
+            const subject = document.getElementById('gameSubject').value;
+            const yearLevel = document.getElementById('yearLevel').value;
+            const template = document.getElementById('selectedTemplate').value;
+            const description = document.getElementById('gameDescription').value.trim();
+
+            if (!title || !teacher || !subject || !template) {
+                alert('Please fill in all required fields');
+                return null;
+            }
+
+            const questions = [];
+            document.querySelectorAll('.question-item').forEach((item, index) => {
+                const qid = item.id.replace('question-', '');
+                const text = item.querySelector('.question-text').value.trim();
+                const answer = item.querySelector('.question-answer').value.trim();
+                const hint = item.querySelector('.question-hint').value.trim();
+                const difficulty = item.querySelector('.difficulty-btn.selected')?.dataset.level || '3';
+
+                if (text && answer) {
+                    questions.push({
+                        id: index + 1,
+                        question: text,
+                        answer: answer,
+                        hint: hint,
+                        difficulty: parseInt(difficulty)
+                    });
+                }
+            });
+
+            if (questions.length !== 20) {
+                alert(`You need exactly 20 questions. Currently have: ${questions.length}`);
+                return null;
+            }
+
+            const gameId = editingGameId || generateGameId(title, teacher);
+
+            return {
+                gameId: gameId,
+                title: title,
+                teacher: teacher,
+                subject: subject,
+                yearLevel: yearLevel,
+                template: template,
+                description: description,
+                questions: questions,
+                createdAt: editingGameId ? getGame(gameId).createdAt : new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                plays: editingGameId ? getGame(gameId).plays : 0
+            };
+        }
+
+        // Generate game ID
+        function generateGameId(title, teacher) {
+            const slug = (title + '-' + teacher).toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-+|-+$/g, '');
+            return 'custom-' + slug + '-' + Date.now();
+        }
+
+        // Submit form
+        document.getElementById('gameForm').onsubmit = function(e) {
+            e.preventDefault();
+
+            const gameData = collectFormData();
+            if (!gameData) return;
+
+            // Save to localStorage
+            localStorage.setItem(`game_${gameData.gameId}`, JSON.stringify(gameData));
+
+            // Clear draft
+            localStorage.removeItem('draft_game');
+
+            alert(`✅ Game "${gameData.title}" published successfully!\n\nStudents can now play your game.`);
+
+            resetForm();
+            switchTab('my-games');
+            loadMyGames();
+        };
+
+        // Save as draft
+        function saveAsDraft() {
+            const gameData = collectFormData();
+            if (!gameData) return;
+
+            localStorage.setItem('draft_game', JSON.stringify(gameData));
+            alert('💾 Draft saved! You can continue editing later.');
+        }
+
+        // Load draft
+        function loadDraftIfExists() {
+            const draft = localStorage.getItem('draft_game');
+            if (draft && confirm('Found a saved draft. Continue editing?')) {
+                loadGameIntoForm(JSON.parse(draft));
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('gameForm').reset();
+            document.getElementById('questionsContainer').innerHTML = '';
+            currentQuestionCount = 0;
+            editingGameId = null;
+            addQuestion();
+            document.querySelectorAll('.template-card').forEach(card => card.classList.remove('selected'));
+        }
+
+        // Load my games
+        function loadMyGames() {
+            const gamesGrid = document.getElementById('myGamesGrid');
+            const games = [];
+
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('game_custom-')) {
+                    games.push(JSON.parse(localStorage.getItem(key)));
+                }
+            }
+
+            if (games.length === 0) {
+                gamesGrid.innerHTML = '<div style="text-align: center; padding: 40px; color: #888; grid-column: 1 / -1;">No games yet. Create your first game!</div>';
+                return;
+            }
+
+            games.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+            gamesGrid.innerHTML = games.map(game => `
+                <div class="game-card">
+                    <div class="game-card-title">${game.title}</div>
+                    <div class="game-card-meta">
+                        ${game.subject} | ${game.teacher}
+                        ${game.yearLevel ? `| Year ${game.yearLevel}` : ''}
+                    </div>
+                    <div class="game-card-stats">
+                        <div style="margin-bottom: 8px;">📊 ${game.plays || 0} plays</div>
+                        <div style="margin-bottom: 8px;">❓ ${game.questions.length} questions</div>
+                        <div style="font-size: 0.85em; color: #888;">Updated: ${new Date(game.updatedAt).toLocaleDateString()}</div>
+                    </div>
+                    <div class="game-card-actions">
+                        <button class="btn btn-primary btn-small" onclick="playGame('${game.gameId}')">▶ Play</button>
+                        <button class="btn btn-secondary btn-small" onclick="editGame('${game.gameId}')">✏️ Edit</button>
+                        <button class="btn btn-secondary btn-small" onclick="exportGame('${game.gameId}')">📥</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteGame('${game.gameId}')">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Get game
+        function getGame(gameId) {
+            return JSON.parse(localStorage.getItem(`game_${gameId}`));
+        }
+
+        // Edit game
+        function editGame(gameId) {
+            const game = getGame(gameId);
+            if (!game) return;
+
+            editingGameId = gameId;
+            loadGameIntoForm(game);
+            switchTab('create');
+        }
+
+        // Load game into form
+        function loadGameIntoForm(game) {
+            document.getElementById('gameTitle').value = game.title;
+            document.getElementById('teacherName').value = game.teacher;
+            document.getElementById('gameSubject').value = game.subject;
+            document.getElementById('yearLevel').value = game.yearLevel || '';
+            document.getElementById('gameDescription').value = game.description || '';
+            document.getElementById('selectedTemplate').value = game.template;
+
+            // Select template
+            document.querySelectorAll('.template-card').forEach(card => {
+                card.classList.remove('selected');
+                if (card.dataset.template === game.template) {
+                    card.classList.add('selected');
+                }
+            });
+
+            // Load questions
+            document.getElementById('questionsContainer').innerHTML = '';
+            currentQuestionCount = 0;
+
+            game.questions.forEach(q => {
+                addQuestion();
+                const qid = 'q' + currentQuestionCount;
+                document.querySelector(`.question-text[data-qid="${qid}"]`).value = q.question;
+                document.querySelector(`.question-answer[data-qid="${qid}"]`).value = q.answer;
+                document.querySelector(`.question-hint[data-qid="${qid}"]`).value = q.hint || '';
+
+                // Set difficulty
+                document.querySelectorAll(`[data-qid="${qid}"].difficulty-btn`).forEach(btn => {
+                    btn.classList.remove('selected');
+                    if (parseInt(btn.dataset.level) === q.difficulty) {
+                        btn.classList.add('selected');
+                    }
+                });
+            });
+        }
+
+        // Delete game
+        function deleteGame(gameId) {
+            if (confirm('Are you sure you want to delete this game?\n\nThis cannot be undone.')) {
+                localStorage.removeItem(`game_${gameId}`);
+                loadMyGames();
+            }
+        }
+
+        // Play game
+        function playGame(gameId) {
+            window.location.href = `../games/dynamic-game.html?id=${gameId}`;
+        }
+
+        // Export game
+        function exportGame(gameId) {
+            const game = getGame(gameId);
+            const dataStr = JSON.stringify(game, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${gameId}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Export all games
+        function exportAllGames() {
+            const games = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('game_custom-')) {
+                    games.push(JSON.parse(localStorage.getItem(key)));
+                }
+            }
+
+            if (games.length === 0) {
+                alert('No games to export');
+                return;
+            }
+
+            const dataStr = JSON.stringify(games, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `fragment-games-export-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            alert(`Exported ${games.length} games`);
+        }
+
+        // Import games
+        function importGames() {
+            document.getElementById('importFile').click();
+        }
+
+        // Handle import
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    const games = Array.isArray(data) ? data : [data];
+
+                    let imported = 0;
+                    games.forEach(game => {
+                        if (game.gameId && game.title && game.questions) {
+                            localStorage.setItem(`game_${game.gameId}`, JSON.stringify(game));
+                            imported++;
+                        }
+                    });
+
+                    alert(`✅ Imported ${imported} game(s)`);
+                    loadMyGames();
+                } catch (err) {
+                    alert('❌ Error importing file. Please check the format.');
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Auto-save draft every 2 minutes
+        setInterval(() => {
+            const data = collectFormData();
+            if (data && data.questions.length > 0) {
+                localStorage.setItem('draft_game_autosave', JSON.stringify(data));
+            }
+        }, 120000);
+    </script>
+</body>
+</html>
