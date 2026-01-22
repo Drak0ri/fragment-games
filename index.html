@@ -6,29 +6,29 @@
     <title>Fragment Games 🎮</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap');
-        
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Fredoka', sans-serif;
             background: #FFF5E1;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 20% 30%, rgba(255, 183, 197, 0.3) 0%, transparent 50%),
                 radial-gradient(circle at 80% 70%, rgba(189, 224, 254, 0.3) 0%, transparent 50%),
                 radial-gradient(circle at 40% 80%, rgba(255, 250, 205, 0.3) 0%, transparent 50%);
             min-height: 100vh;
             padding: 20px;
         }
-        
+
         .header {
             text-align: center;
             margin-bottom: 30px;
         }
-        
+
         .header h1 {
             font-size: 4em;
             font-weight: 700;
@@ -39,18 +39,75 @@
             margin-bottom: 10px;
             animation: bounce 2s ease-in-out infinite;
         }
-        
+
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
-        
+
         .header p {
             font-size: 1.4em;
             color: #8B4789;
             font-weight: 600;
         }
-        
+
+        .top-bar {
+            max-width: 1400px;
+            margin: 0 auto 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 20px 30px;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: 2px solid #FF6B9D;
+            border-radius: 20px;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            color: #FF6B9D;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: #FF6B9D;
+            color: white;
+        }
+
+        .teacher-portal-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .teacher-portal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
         /* Mini-games sidebar */
         .mini-games-sidebar {
             position: fixed;
@@ -63,7 +120,7 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.15);
             z-index: 100;
         }
-        
+
         .mini-games-sidebar h3 {
             writing-mode: vertical-rl;
             text-orientation: mixed;
@@ -72,7 +129,7 @@
             margin-bottom: 15px;
             font-weight: 700;
         }
-        
+
         .mini-btn {
             display: block;
             width: 60px;
@@ -85,32 +142,41 @@
             transition: all 0.3s;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        
+
         .mini-btn:hover {
             transform: scale(1.15) rotate(5deg);
             box-shadow: 0 6px 25px rgba(0,0,0,0.2);
         }
-        
+
         .mini-btn:nth-child(2) { background: linear-gradient(135deg, #FFD93D 0%, #FFA500 100%); }
         .mini-btn:nth-child(3) { background: linear-gradient(135deg, #6BCF7F 0%, #4CAF50 100%); }
         .mini-btn:nth-child(4) { background: linear-gradient(135deg, #FF6B9D 0%, #C44569 100%); }
         .mini-btn:nth-child(5) { background: linear-gradient(135deg, #A8E6CF 0%, #56CCF2 100%); }
         .mini-btn:nth-child(6) { background: linear-gradient(135deg, #C4A9FF 0%, #9B59B6 100%); }
         .mini-btn:nth-child(7) { background: linear-gradient(135deg, #FFB6B9 0%, #FEC8D8 100%); }
-        
+
         /* Main content */
         .main-container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 100px; /* Space for sidebars */
         }
-        
+
+        .section-title {
+            font-size: 2em;
+            color: #333;
+            margin: 30px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #FF6B9D;
+        }
+
         .games-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 25px;
+            margin-bottom: 40px;
         }
-        
+
         .game-card {
             background: white;
             border-radius: 30px;
@@ -121,28 +187,16 @@
             position: relative;
             border: 4px solid transparent;
         }
-        
+
         .game-card:hover {
             transform: translateY(-15px) rotate(-2deg);
             box-shadow: 0 25px 50px rgba(0,0,0,0.2);
         }
-        
-        .game-card.active {
-            border-color: #FF6B9D;
-            animation: pulse 2s ease-in-out infinite;
+
+        .game-card.custom {
+            border-color: #667eea;
         }
-        
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 15px 35px rgba(255, 107, 157, 0.3); }
-            50% { box-shadow: 0 15px 50px rgba(255, 107, 157, 0.6); }
-        }
-        
-        .game-card.coming-soon {
-            opacity: 0.7;
-            cursor: not-allowed;
-            filter: grayscale(0.3);
-        }
-        
+
         .badge {
             position: absolute;
             top: -15px;
@@ -153,24 +207,24 @@
             font-size: 0.85em;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
-        
-        .badge.active {
-            background: linear-gradient(135deg, #FF6B9D 0%, #C44569 100%);
+
+        .badge.custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-        
-        .badge.locked {
-            background: #E0E0E0;
-            color: #888;
+
+        .badge.demo {
+            background: linear-gradient(135deg, #FFD93D 0%, #FFA500 100%);
+            color: white;
         }
-        
+
         .game-icon {
             font-size: 4em;
             margin-bottom: 15px;
             text-align: center;
             filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
         }
-        
+
         .game-title {
             font-size: 1.6em;
             margin-bottom: 8px;
@@ -178,15 +232,15 @@
             font-weight: 700;
             text-align: center;
         }
-        
-        .game-dates {
+
+        .game-meta {
             text-align: center;
             font-size: 0.85em;
             color: #888;
             margin-bottom: 15px;
             font-weight: 600;
         }
-        
+
         .game-description {
             line-height: 1.6;
             color: #555;
@@ -195,7 +249,7 @@
             min-height: 85px;
             font-size: 0.95em;
         }
-        
+
         .game-stats {
             display: flex;
             justify-content: space-around;
@@ -204,11 +258,11 @@
             background: linear-gradient(135deg, #FFF9E6 0%, #FFE5EC 100%);
             border-radius: 20px;
         }
-        
+
         .stat {
             text-align: center;
         }
-        
+
         .stat-value {
             font-size: 1.8em;
             font-weight: 700;
@@ -217,14 +271,14 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
+
         .stat-label {
             font-size: 0.7em;
             color: #888;
             margin-top: 5px;
             font-weight: 600;
         }
-        
+
         .play-button {
             width: 100%;
             padding: 15px;
@@ -238,34 +292,40 @@
             color: white;
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
-        
+
         .game-card.theme-ai .play-button {
             background: linear-gradient(135deg, #6BCF7F 0%, #4CAF50 100%);
         }
-        
+
         .game-card.theme-virus .play-button {
             background: linear-gradient(135deg, #FF6B9D 0%, #C44569 100%);
         }
-        
+
         .game-card.theme-history .play-button {
             background: linear-gradient(135deg, #FFD93D 0%, #FFA500 100%);
         }
-        
+
         .game-card.theme-scifi .play-button {
             background: linear-gradient(135deg, #56CCF2 0%, #2F80ED 100%);
         }
-        
+
         .play-button:hover:not(:disabled) {
             transform: scale(1.05);
             box-shadow: 0 12px 30px rgba(0,0,0,0.25);
         }
-        
-        .play-button:disabled {
-            background: #D0D0D0;
-            cursor: not-allowed;
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
             color: #888;
+            grid-column: 1 / -1;
         }
-        
+
+        .empty-state-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
         /* Fun decorative elements */
         .sparkle {
             position: fixed;
@@ -274,23 +334,23 @@
             pointer-events: none;
             opacity: 0.6;
         }
-        
+
         @keyframes float {
             0%, 100% { transform: translateY(0px) rotate(0deg); }
             50% { transform: translateY(-20px) rotate(180deg); }
         }
-        
+
         .sparkle:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
         .sparkle:nth-child(2) { top: 20%; right: 15%; animation-delay: 0.5s; }
         .sparkle:nth-child(3) { bottom: 15%; left: 20%; animation-delay: 1s; }
         .sparkle:nth-child(4) { bottom: 25%; right: 10%; animation-delay: 1.5s; }
-        
+
         @media (max-width: 1200px) {
             .games-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-        
+
         @media (max-width: 768px) {
             .mini-games-sidebar {
                 position: static;
@@ -301,24 +361,32 @@
                 justify-content: center;
                 padding: 15px;
             }
-            
+
             .mini-games-sidebar h3 {
                 writing-mode: horizontal-tb;
                 width: 100%;
                 text-align: center;
                 margin-bottom: 10px;
             }
-            
+
             .mini-btn {
                 margin: 5px;
             }
-            
+
             .main-container {
                 padding: 0;
             }
-            
+
             .games-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .top-bar {
+                flex-direction: column;
+            }
+
+            .filter-section {
+                justify-content: center;
             }
         }
     </style>
@@ -329,12 +397,26 @@
     <div class="sparkle">🌟</div>
     <div class="sparkle">⭐</div>
     <div class="sparkle">💫</div>
-    
+
     <div class="header">
         <h1>🎮 Fragment Games - IESV 🎮</h1>
-        <p>Pick Your Adventure!</p>
+        <p>Choose Your Learning Adventure!</p>
     </div>
-    
+
+    <div class="top-bar">
+        <div class="filter-section">
+            <span style="font-weight: 600; color: #666;">Filter:</span>
+            <button class="filter-btn active" onclick="filterGames('all')">All Games</button>
+            <button class="filter-btn" onclick="filterGames('Mathematics')">Math</button>
+            <button class="filter-btn" onclick="filterGames('Science')">Science</button>
+            <button class="filter-btn" onclick="filterGames('History')">History</button>
+            <button class="filter-btn" onclick="filterGames('English')">English</button>
+        </div>
+        <button class="teacher-portal-btn" onclick="openTeacherPortal()">
+            👨‍🏫 Teacher Portal
+        </button>
+    </div>
+
     <!-- Mini-games sidebar -->
     <div class="mini-games-sidebar">
         <h3>⚡ Quick Games ⚡</h3>
@@ -345,122 +427,261 @@
         <button class="mini-btn" onclick="launchMiniGame('pattern')" title="Pattern Hunt">🔍</button>
         <button class="mini-btn" onclick="launchMiniGame('code')" title="Debug Code">💻</button>
     </div>
-    
+
     <div class="main-container">
-        <div class="games-grid">
-            <!-- ACTIVE GAME -->
-            <div class="game-card active theme-ai" onclick="launchGame('oracle-7')">
-                <div class="badge active">🔥 PLAYING NOW!</div>
-                <div class="game-icon">🤖</div>
-                <h2 class="game-title">ORACLE-7</h2>
-                <div class="game-dates">Jan 20 - Feb 3</div>
-                <p class="game-description">
-                    Help restore a broken AI! Find 20 memory pieces and discover what happened. Can you solve the mystery?
-                </p>
-                <div class="game-stats">
-                    <div class="stat">
-                        <div class="stat-value">127</div>
-                        <div class="stat-label">Players</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">8</div>
-                        <div class="stat-label">Progress</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">3</div>
-                        <div class="stat-label">Winners</div>
-                    </div>
-                </div>
-                <button class="play-button">Let's Go! →</button>
+        <!-- Teacher-Created Games -->
+        <div id="customGamesSection">
+            <h2 class="section-title">📚 Teacher-Created Games</h2>
+            <div class="games-grid" id="customGamesGrid">
+                <!-- Teacher games will load here -->
             </div>
-            
-            <!-- COMING SOON -->
-            <div class="game-card coming-soon theme-virus">
-                <div class="badge locked">🔒 Coming Soon</div>
-                <div class="game-icon">🦠</div>
-                <h2 class="game-title">Virus Hunt</h2>
-                <div class="game-dates">Starts Feb 4</div>
-                <p class="game-description">
-                    Oh no! The school network has a virus! Be a cyber hero and track down the bad code before it spreads!
-                </p>
-                <div class="game-stats">
-                    <div class="stat">
-                        <div class="stat-value">?</div>
-                        <div class="stat-label">Players</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">?</div>
-                        <div class="stat-label">Progress</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">?</div>
-                        <div class="stat-label">Winners</div>
-                    </div>
-                </div>
-                <button class="play-button" disabled>Not Yet!</button>
-            </div>
-            
-            <div class="game-card coming-soon theme-history">
-                <div class="badge locked">🔒 Coming Soon</div>
-                <div class="game-icon">📜</div>
-                <h2 class="game-title">Time Capsule</h2>
-                <div class="game-dates">Starts Feb 18</div>
-                <p class="game-description">
-                    What's buried under the school? Ancient treasures? Time travel secrets? Dig up history and solve the puzzle!
-                </p>
-                <div class="game-stats">
-                    <div class="stat">
-                        <div class="stat-value">?</div>
-                        <div class="stat-label">Players</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">?</div>
-                        <div class="stat-label">Progress</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">?</div>
-                        <div class="stat-label">Winners</div>
-                    </div>
-                </div>
-                <button class="play-button" disabled>Not Yet!</button>
-            </div>
-            
-            <div class="game-card coming-soon theme-scifi">
-                <div class="badge locked">🔒 Coming Soon</div>
-                <div class="game-icon">🚀</div>
-                <h2 class="game-title">Escape Pod</h2>
-                <div class="game-dates">Starts Mar 4</div>
-                <p class="game-description">
-                    Space station emergency! Fix the systems and launch your escape pod before time runs out. Blast off to safety!
-                </p>
-                <div class="game-stats">
-                    <div class="stat">
-                        <div class="stat-value">?</div>
-                        <div class="stat-label">Players</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">?</div>
-                        <div class="stat-label">Progress</div>
-                    </div>
-                    <div class="stat">
-                        <div class="stat-value">?</div>
-                        <div class="stat-label">Winners</div>
-                    </div>
-                </div>
-                <button class="play-button" disabled>Not Yet!</button>
+        </div>
+
+        <!-- Built-In Games (ORACLE-7) -->
+        <div id="builtInGamesSection">
+            <h2 class="section-title">🎮 Built-In Games</h2>
+            <div class="games-grid" id="builtInGamesGrid">
+                <!-- Built-in games will load here -->
             </div>
         </div>
     </div>
-    
+
+    <script src="shared/js/auth.js"></script>
     <script>
+        let currentFilter = 'all';
+
+        // Initialize
+        window.onload = function() {
+            createDemoGame(); // Ensure demo exists
+            loadAllGames();
+        };
+
+        // Create demo game (if doesn't exist)
+        function createDemoGame() {
+            const demoId = 'game_demo-math-adventure';
+            if (localStorage.getItem(demoId)) return; // Already exists
+
+            const demoGame = {
+                gameId: 'demo-math-adventure',
+                title: '🎓 Math Adventure Demo',
+                teacher: 'Demo Teacher',
+                subject: 'Mathematics',
+                yearLevel: '5',
+                template: 'ai',
+                description: 'Try this sample game to see how teacher-created games work!',
+                questions: [
+                    {id: 1, question: 'What is 5 + 3?', answer: '8', hint: 'Add the numbers together', difficulty: 1},
+                    {id: 2, question: 'What is 10 - 4?', answer: '6', hint: 'Subtract', difficulty: 1},
+                    {id: 3, question: 'What is 3 × 4?', answer: '12', hint: 'Multiply', difficulty: 2},
+                    {id: 4, question: 'What is 20 ÷ 4?', answer: '5', hint: 'Divide', difficulty: 2},
+                    {id: 5, question: 'What is 7 + 8?', answer: '15', hint: 'Add', difficulty: 2},
+                    {id: 6, question: 'What is 15 - 6?', answer: '9', hint: 'Subtract', difficulty: 2},
+                    {id: 7, question: 'What is 6 × 7?', answer: '42', hint: 'Multiply', difficulty: 3},
+                    {id: 8, question: 'What is 36 ÷ 6?', answer: '6', hint: 'Divide', difficulty: 3},
+                    {id: 9, question: 'What is 12 + 15?', answer: '27', hint: 'Add', difficulty: 3},
+                    {id: 10, question: 'What is 25 - 9?', answer: '16', hint: 'Subtract', difficulty: 3},
+                    {id: 11, question: 'What is 8 × 9?', answer: '72', hint: 'Multiply', difficulty: 3},
+                    {id: 12, question: 'What is 48 ÷ 8?', answer: '6', hint: 'Divide', difficulty: 3},
+                    {id: 13, question: 'What is 23 + 19?', answer: '42', hint: 'Add larger numbers', difficulty: 4},
+                    {id: 14, question: 'What is 50 - 17?', answer: '33', hint: 'Subtract', difficulty: 4},
+                    {id: 15, question: 'What is 11 × 11?', answer: '121', hint: 'Square number', difficulty: 4},
+                    {id: 16, question: 'What is 144 ÷ 12?', answer: '12', hint: 'Divide', difficulty: 4},
+                    {id: 17, question: 'What is 35 + 48?', answer: '83', hint: 'Add', difficulty: 4},
+                    {id: 18, question: 'What is 100 - 37?', answer: '63', hint: 'Subtract', difficulty: 5},
+                    {id: 19, question: 'What is 13 × 13?', answer: '169', hint: 'Square 13', difficulty: 5},
+                    {id: 20, question: 'What is 200 ÷ 8?', answer: '25', hint: 'Divide', difficulty: 5}
+                ],
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                plays: 0,
+                isDemo: true
+            };
+
+            localStorage.setItem(demoId, JSON.stringify(demoGame));
+        }
+
+        // Load all games
+        function loadAllGames() {
+            const customGames = [];
+            const builtInGames = [];
+
+            // Scan localStorage for custom games
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith('game_')) {
+                    const game = JSON.parse(localStorage.getItem(key));
+
+                    // Apply filter
+                    if (currentFilter !== 'all' && game.subject !== currentFilter) {
+                        continue;
+                    }
+
+                    customGames.push(game);
+                }
+            }
+
+            // Add ORACLE-7 as built-in game
+            builtInGames.push({
+                gameId: 'oracle-7',
+                title: 'ORACLE-7',
+                teacher: 'Fragment Games',
+                subject: 'Mixed',
+                template: 'ai',
+                description: 'Restore ORACLE-7\'s corrupted memory by solving 20 puzzles! Pattern recognition, logic, ciphers, and more.',
+                questions: [],
+                plays: 0,
+                isBuiltIn: true
+            });
+
+            // Render
+            renderCustomGames(customGames);
+            renderBuiltInGames(builtInGames);
+        }
+
+        // Render custom games
+        function renderCustomGames(games) {
+            const grid = document.getElementById('customGamesGrid');
+
+            if (games.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📚</div>
+                        <h3>No Teacher Games Yet</h3>
+                        <p>Teachers can create custom games using the Teacher Portal</p>
+                        <button class="teacher-portal-btn" onclick="openTeacherPortal()" style="margin-top: 20px;">
+                            Create First Game
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            games.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+            grid.innerHTML = games.map(game => createGameCard(game, true)).join('');
+        }
+
+        // Render built-in games
+        function renderBuiltInGames(games) {
+            const grid = document.getElementById('builtInGamesGrid');
+            grid.innerHTML = games.map(game => createGameCard(game, false)).join('');
+        }
+
+        // Create game card HTML
+        function createGameCard(game, isCustom) {
+            const templateIcons = {
+                'ai': '🤖',
+                'virus': '🦠',
+                'history': '📜',
+                'scifi': '🚀'
+            };
+
+            const icon = templateIcons[game.template] || '🎮';
+
+            return `
+                <div class="game-card ${isCustom ? 'custom' : ''} theme-${game.template}" onclick="launchGame('${game.gameId}')">
+                    <div class="badge ${isCustom ? 'custom' : 'demo'}">${isCustom ? '👨‍🏫 CUSTOM' : '🎮 BUILT-IN'}</div>
+                    <div class="game-icon">${icon}</div>
+                    <h2 class="game-title">${game.title}</h2>
+                    <div class="game-meta">${game.subject} | ${game.teacher}${game.yearLevel ? ` | Year ${game.yearLevel}` : ''}</div>
+                    <p class="game-description">
+                        ${game.description || 'Complete 20 questions to finish this game!'}
+                    </p>
+                    <div class="game-stats">
+                        <div class="stat">
+                            <div class="stat-value">${game.plays || 0}</div>
+                            <div class="stat-label">Plays</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">20</div>
+                            <div class="stat-label">Questions</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value">${game.questions.length > 0 ? getAvgDifficulty(game) : '⭐⭐⭐'}</div>
+                            <div class="stat-label">Difficulty</div>
+                        </div>
+                    </div>
+                    <button class="play-button">Let's Go! →</button>
+                </div>
+            `;
+        }
+
+        // Get average difficulty
+        function getAvgDifficulty(game) {
+            if (!game.questions || game.questions.length === 0) return '⭐⭐⭐';
+            const avg = game.questions.reduce((sum, q) => sum + q.difficulty, 0) / game.questions.length;
+            return '⭐'.repeat(Math.round(avg));
+        }
+
+        // Filter games
+        function filterGames(subject) {
+            currentFilter = subject;
+
+            // Update buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Reload games
+            loadAllGames();
+        }
+
+        // Launch game
         function launchGame(gameId) {
+            // Check if logged in
+            if (!isLoggedIn()) {
+                if (confirm('Please register to play games.\n\nRegister now?')) {
+                    const email = prompt('Enter your email:');
+                    if (email && isValidEmail(email)) {
+                        registerAgent(email);
+
+                        // Route to correct game
+                        if (gameId === 'oracle-7') {
+                            window.location.href = `games/oracle-7/dashboard.html`;
+                        } else {
+                            window.location.href = `games/dynamic-game.html?id=${gameId}`;
+                        }
+                    } else {
+                        alert('Invalid email. Please try again.');
+                    }
+                }
+                return;
+            }
+
+            // Route to correct game
             if (gameId === 'oracle-7') {
-                window.location.href = `games/${gameId}/landing.html`;
+                window.location.href = `games/oracle-7/dashboard.html`;
+            } else {
+                window.location.href = `games/dynamic-game.html?id=${gameId}`;
             }
         }
-        
+
         function launchMiniGame(gameType) {
             window.location.href = `mini-games/${gameType}.html`;
+        }
+
+        function openTeacherPortal() {
+            window.location.href = 'admin/teacher-portal.html';
+        }
+
+        // Helper functions for registration
+        function isLoggedIn() {
+            return localStorage.getItem('agent_id') !== null;
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function registerAgent(email) {
+            const agent = {
+                id: 'AGENT-' + Math.random().toString(36).substr(2, 6).toUpperCase(),
+                email: email,
+                created: new Date().toISOString()
+            };
+            localStorage.setItem('agent', JSON.stringify(agent));
+            localStorage.setItem('agent_id', agent.id);
         }
     </script>
 </body>
